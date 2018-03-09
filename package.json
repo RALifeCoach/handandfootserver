@@ -2,7 +2,7 @@
   "name": "handandfoot-server",
   "version": "1.0.0",
   "description": "Hand and Foot card game",
-  "repository": "https://github.com/RALifeCoach/hand-and-foot.git",
+  "repository": "https://github.com/RALifeCoach/handandfootserver.git",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -12,12 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "dns": "^0.2.2",
     "express": "^4.16.2",
+    "fs": "0.0.1-security",
     "jsonwebtoken": "^8.2.0",
+    "module": "^1.2.5",
     "mongoose": "^5.0.9",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "net": "^1.0.2",
+    "tls": "0.0.1"
   },
   "devDependencies": {
-    "webpack": "^4.1.1"
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.10"
   }
 }

@@ -1,4 +1,4 @@
 export default {
     'secret': 'ilovescotchyscotch',
-    'database': 'mongodb://noder:noderauth&54;proximus.modulusmongo.net:27017/so9pojyN'
+    'database': 'mongodb://coliphant:September30@ds253468.mlab.com:53468/hand-and-foot'
 };
