@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Hand and Foot card game",
   "repository": "https://github.com/RALifeCoach/handandfootserver.git",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "build": "webpack",
-    "start": "node dist/main.js",
+    "build": "webpack --watch",
+    "start": "nodemon dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Christopher Oliphant",
@@ -24,6 +24,7 @@
     "tls": "0.0.1"
   },
   "devDependencies": {
+    "nodemon": "^1.17.1",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.10"
   }
