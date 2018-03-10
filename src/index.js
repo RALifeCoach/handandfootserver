@@ -7,6 +7,8 @@ import bodyParser from 'body-parser';
 import morgan     from 'morgan';
 import mongoose   from 'mongoose';
 
+import { cryptPassword, comparePassword } from './utils/passwords';
+
 import jwt        from 'jsonwebtoken'; // used to create, sign, and verify tokens
 import config     from './config'; // get our config file
 import User       from './models/user'; // get our mongoose model
@@ -35,17 +37,47 @@ app.get('/', function(req, res) {
 
 app.get('/setup', (req, res) => {
     // create a sample user
-    var nick = new User({
-        name: 'Nick Cerminara',
-        password: 'password',
-        admin: true
+    const chris = new User({
+        name: 'Chris',
+        password: cryptPassword('chris@gmail.com'),
+        email: 'chris@gmail.com'
+    });
+    const ronna = new User({
+        name: 'Ronna',
+        password: cryptPassword('ronna@gmail.com'),
+        email: 'ronna@gmail.com'
+    });
+    const peter = new User({
+        name: 'Peter',
+        password: cryptPassword('peter@gmail.com'),
+        email: 'peter@gmail.com'
+    });
+    const elayne = new User({
+        name: 'Elayne',
+        password: cryptPassword('elayne@gmail.com'),
+        email: 'elayne@gmail.com'
     });
     // save the sample user
-    nick.save(err => {
-        if (err) throw err;
+    chris.save(errChris => {
+        if (errChris) throw errChris;
 
-        console.log('User saved successfully');
-        res.json({ success: true });
+        console.log('Chris saved successfully');
+        ronna.save(errRonna => {
+            if (errRonna) throw errRonna;
+
+            console.log('Ronna saved successfully');
+            peter.save(errPeter => {
+                if (errPeter) throw errPeter;
+
+                console.log('Peter saved successfully');
+                elayne.save(errElayne => {
+                    if (errElayne) throw errElayne;
+
+                    console.log('Elayne saved successfully');
+                    res.json({ success: true });
+                });
+            });
+        });
     });
 });
 
@@ -57,7 +89,7 @@ const apiRoutes = express.Router();
 apiRoutes.post('/authenticate', (req, res) => {
     // find the user
     User.findOne({
-        name: req.body.name
+        email: req.body.email
     }, (err, user) => {
 
         if (err) throw err;
@@ -67,10 +99,10 @@ apiRoutes.post('/authenticate', (req, res) => {
         } else if (user) {
 
             // check if password matches
-            if (user.password !== req.body.password) {
+            console.log(user);
+            if (!comparePassword(req.body.password, user.password)) {
                 res.json({ success: false, message: 'Authentication failed. Wrong password.' });
             } else {
-
                 // if user is found and password is right
                 // create a token with only our given payload
                 // we don't want to pass in the entire user since that has the password
