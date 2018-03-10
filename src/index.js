@@ -16,7 +16,7 @@ import User       from './models/user'; // get our mongoose model
 // =======================
 // configuration =========
 // =======================
-const port = process.env.PORT || 8080; // used to create, sign, and verify tokens
+const port = process.env.PORT || 80; // used to create, sign, and verify tokens
 mongoose.connect(config.database.replace('{password}', process.env.PASSWORD)); // connect to database
 app.set('superSecret', config.secret); // secret variable
 
