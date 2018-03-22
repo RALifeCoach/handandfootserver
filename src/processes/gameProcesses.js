@@ -1,25 +1,43 @@
 import GameModel from '../models/game';
+import GameEvents from '../utils/gameEvents';
+import { directions } from './../constants';
 
 class GameProcesses {
     constructor() {
         this.game = null;
     }
 
-    fetchGame(gameName) {
-        return new Promise((resolve, reject)=>{
-            GameModel.findOne({name: gameName}, (err, game)=>{
-                if (err || !game) {
-                    reject(`${gameName} not found`);
-                } else {
-                    this.game = game;
-                    resolve();
-                }
-            });
-        });
+    async updateGame(gameName, updateData, updateFunction) {
+        this.game = await this.fetchGame(gameName);
+        if (!this.game) {
+            throw new Error(gameName + ' not found');
+        }
+
+        updateFunction(updateData);
+
+        try {
+            this.game = await this.game.save();
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    async fetchGame(gameName) {
+        if (this.game && this.game.name === gameName) {
+            return this.game;
+        }
+        try {
+            console.log('find one');
+            console.log(GameModel.findOne.toString());
+            this.game = await GameModel.findOne({name: gameName});
+        } catch (err) {
+            this.game = null;
+            throw err;
+        }
     }
 
     createNewGame(gameName, password) {
-        const game = new GameModel({
+        const game = GameModel.create({
             name: gameName,
             password,
             teams: [
@@ -54,66 +72,28 @@ class GameProcesses {
         });
     }
 
-    addPlayers(gameName, players) {
-        return new Promise((resolve, reject)=>{
-            (!this.game || this.game.name !== gameName
-                ? this.fetchGame(gameName)
-                : new Promise(innerResolve=>innerResolve()))
-                .then(()=> {
-                    if (!this.game) {
-                        reject(gameName + ' not found');
-                        return;
-                    }
-                    console.log(players);
-                    players.forEach(playerData =>
-                        Object.assign(this.game.players[playerData.directionData.team * 2
-                            + playerData.directionData.player], {
-                            connected: false,
-                            user: playerData.user
-                        })
-                    );
-                    console.log(this.game.players[0]);
-                    this.game.save((err, game)=>{
-                        if (err) {
-                            reject(err);
-                        } else {
-                            this.game = game;
-                            resolve();
-                        }
-                    })
-                });
-        }).catch(err=>{throw err;});
+    addPlayersFunction(updateData) {
+        updateData.players.forEach(playerData =>
+            Object.assign(this.game.players[playerData.directionData.playerIndex], {
+                connected: false,
+                user: playerData.user
+            })
+        );
     }
 
-    joinGame(gameName, direction, user) {
-        return new Promise((resolve, reject)=>{
-            (!this.game || this.game.name !== gameName
-                ? this.fetchGame(gameName)
-                : new Promise(innerResolve=>innerResolve()))
-                .then(()=> {
-                    if (!this.game) {
-                        reject(gameName + ' not found');
-                        return;
-                    }
+    joinGame(updateData) {
+        const directionData = directions
+            .find(directionInstance => directionInstance.direction === updateData.direction);
 
-                    players.forEach(playerData =>
-                        Object.assign(this.game.players[playerData.directionData.team * 2
-                        + playerData.directionData.player], {
-                            connected: false,
-                            user: playerData.user
-                        })
-                    );
+        Object.assign(this.game.players[directionData.playerIndex], {
+            connected: true,
+            user: updateData.userData.user
+        });
 
-                    this.game.save((err, game)=>{
-                        if (err) {
-                            reject(err);
-                        } else {
-                            this.game = game;
-                            resolve();
-                        }
-                    })
-                });
-        }).catch(err=>{throw err;});
+        // this player is fourth player to join
+        if (!Boolean(this.game.players.find(player=> !player.user || !player.connected))) {
+            GameEvents.startGame(this.game);
+        }
     }
 }
 

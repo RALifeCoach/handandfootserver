@@ -53,7 +53,8 @@ export default class GameController {
                     });
                     return;
                 }
-                GameProcesses.addPlayers(req.body.gameName, players)
+                GameProcesses.updateGame(req.body.gameName, {players},
+                        updateData => GameProcesses.addPlayers(updateData))
                     .then(()=>{
                         res.json({
                             success: true

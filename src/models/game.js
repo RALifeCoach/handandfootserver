@@ -3,9 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 import historySchema from './history';
-import teamSchema from './team';
-import pileSchema from './pile';
-import handSchema from "./hand";
+import cardSchema from './card';
 
 const GameSchema = new Schema({
     name: {
@@ -21,18 +19,50 @@ const GameSchema = new Schema({
             },
             connected: Boolean,
             inHand: Boolean,
-            hand: handSchema,
-            foot: handSchema
+            hands: [ {
+                cards: [ cardSchema ],
+                sort: String
+            } ]
         }
     ],
-    password: Schema.Types.Mixed,
+    password: {
+        salt: String,
+        token: String
+    },
     gameComplete: Boolean,
     gameStarted: Boolean,
-    teams: [ teamSchema ],
-    round: Number,
-    currentPlayer: Number,
-    piles: [ pileSchema ],
-    discardPile: pileSchema,
+    teams: [
+        {
+            score: Number,
+            melds: [
+                {
+                    type: String,
+                    cardValue: {
+                        type: Number,
+                        min: 0,
+                        max: 12
+                    },
+                    suit: {
+                        type: String,
+                        enum: ['Club', 'Diamond', 'Heart', 'Spade', 'Joker' ],
+                    },
+                    meldComplete: Boolean,
+                    cards: [ cardSchema ]
+                }
+            ]
+        }
+    ],
+    roundId: Number,
+    currentPlayerIndex: Number,
+    currentPlayerState: String,
+    piles: [
+        {
+            cards: [ cardSchema ]
+        }
+    ],
+    discardPile: {
+        cards: [ cardSchema ]
+    },
     history: [ historySchema ]
 });
 

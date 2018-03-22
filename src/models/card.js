@@ -11,5 +11,6 @@ export default new Schema({
         type: Number,
         min: 0,
         max: 12
-    }
+    },
+    pinnedSeq: Number
 });

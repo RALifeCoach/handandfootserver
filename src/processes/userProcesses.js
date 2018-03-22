@@ -1,14 +1,14 @@
 import UserModel from '../models/user';
 import GameModel from '../models/game';
-import {comparePassword, cryptPassword} from "../utils/passwords";
-import jwt from "jsonwebtoken";
+import {comparePassword, cryptPassword} from '../utils/passwords';
+import jwt from 'jsonwebtoken';
 
 class UserProcesses {
     constructor() {
         this.users = {};
     }
 
-    setup() {
+    static async setup() {
         const chris = new UserModel({
             name: 'Chris',
             password: cryptPassword('chris@gmail.com'),
@@ -30,83 +30,116 @@ class UserProcesses {
             email: 'elayne@gmail.com'
         });
 
-        return new Promise((resolve, reject)=> {
-            UserModel.remove({}, () => {
-                chris.save(errChris => {
-                    if (errChris) {
-                        reject(errChris);
-                        return;
-                    }
-
-                    console.log('Chris saved successfully');
-                    ronna.save(errRonna => {
-                        if (errRonna) {
-                            reject(errRonna);
-                            return;
-                        }
-
-                        console.log('Ronna saved successfully');
-                        peter.save(errPeter => {
-                            if (errPeter) {
-                                reject(errPeter);
-                                return;
-                            }
-
-                            console.log('Peter saved successfully');
-                            elayne.save(errElayne => {
-                                if (errElayne) {
-                                    reject(errElayne);
-                                    return;
-                                }
-
-                                console.log('Elayne saved successfully');
-                                GameModel.remove({}, () => {
-                                    resolve();
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
+        try {
+            await UserModel.remove({});
+        } catch (err) {
+            throw err;
+        }
+        try {
+            await chris.save();
+        } catch (err) {
+            throw err;
+        }
+        try {
+            await ronna.save();
+        } catch (err) {
+            throw err;
+        }
+        try {
+            await peter.save();
+        } catch (err) {
+            throw err;
+        }
+        try {
+            await elayne.save();
+        } catch (err) {
+            throw err;
+        }
+        try {
+            await GameModel.clearGames();
+        } catch (err) {
+            throw err;
+        }
     }
 
-    authenticate(userId, password, superSecret) {
-        return new Promise((resolve, reject)=>{
-            UserModel.findOne({
+    async authenticate(userId, password, superSecret) {
+        let user;
+        try {
+            user = await UserModel.findOne({
                 email: userId
-            }, (err, user) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-
-                if (!user) {
-                    reject(new Error('Authentication failed.'));
-                    return;
-                }
-
-                if (!comparePassword(password, user.password)) {
-                    reject(new Error('Authentication failed.'));
-                    return;
-                }
-
-                const payload = {
-                    name: user.name,
-                    id: user._id
-                };
-                const token = jwt.sign(payload, superSecret, {
-                    expiresIn: 1440 // expires in 24 hours
-                });
-                this.users[token] = user;
-
-                resolve(token);
             });
-        })
+        } catch (err) {
+            throw err;
+        }
+
+        if (!user) {
+            throw new Error('Authentication failed.');
+        }
+
+        if (!comparePassword(password, user.password)) {
+            throw new Error('Authentication failed.');
+        }
+
+        const payload = {
+            name: user.name,
+            id: user._id
+        };
+        const token = jwt.sign(payload, superSecret, {
+            expiresIn: 1440 // expires in 24 hours
+        });
+        this.users[token] = {
+            user
+        };
+
+        return token;
     }
 
     getUserFromToken(token) {
         return this.users[token];
+    }
+
+    broadcastToAllUsers(message) {
+        const originalGame = this.stripDownGame(message);
+        Object.keys(this.users).forEach((token, userIndex) => {
+            const user = this.users[token];
+            this.setPlayerHands(message.game, originalGame, userIndex);
+            if (user.socket) {
+                user.socket.send(JSON.stringify(message));
+            }
+        });
+    }
+
+    stripDownGame(message) {
+        if (!message.game) {
+            return null;
+        }
+        const originalGame = message.game;
+        const game = JSON.parse(JSON.stringify(message.game));
+        game.pileCounts = game.piles.map(pile=>pile.cards.length);
+        delete game.piles;
+        game.discardPileCount = game.discardPile.cards.length;
+        game.discardPileTopCard = game.discardPile.cards[game.discardPile.cards.length - 1];
+        delete game.discardPile;
+        game.players.forEach(player=> {
+            player.handCounts = player.hands.map(hand=>hand.cards.length);
+            delete player.hands;
+        });
+        message.game = game;
+        return originalGame;
+    }
+
+    setPlayerHands(game, originalGame, userIndex) {
+        if (!originalGame) {
+            return;
+        }
+        game.players.forEach(player=> {
+            if (player.hand) {
+                delete player.hand;
+            }
+        });
+        game.players[userIndex].hand = game.players[userIndex].inHand
+            ? originalGame.players[userIndex].hands[0]
+            : originalGame.players[userIndex].hands[1];
     }
 }
 

@@ -34,6 +34,5 @@ export function cryptPassword(userPassword) {
 
 export function comparePassword(plainPass, userPassword) {
     const compare = sha512(plainPass, userPassword.salt);
-    console.log(compare);
     return compare.passwordHash === userPassword.passwordHash;
 }

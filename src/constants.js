@@ -1,24 +1,32 @@
 const directions = [
     {
         direction: 'North',
-        team: 0,
-        player: 0
+        teamIndex: 0,
+        playerIndex: 0
     },
     {
         direction: 'East',
-        team: 1,
-        player: 0
+        teamIndex: 1,
+        playerIndex: 1
     },
     {
         direction: 'South',
-        team: 0,
-        player: 1
+        teamIndex: 0,
+        playerIndex: 2
     },
     {
         direction: 'West',
-        team: 1,
-        player: 1
+        teamIndex: 1,
+        playerIndex: 3
     }
 ];
 
-export { directions };
+const suits = [
+    'Club', 'Diamond', 'Heart', 'Spade', 'Joker'
+];
+
+const sorts = [
+    'none', 'melds', 'runs'
+];
+
+export { directions, suits, sorts };

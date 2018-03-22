@@ -8,7 +8,10 @@
     "build": "webpack",
     "start": "nodemon dist/main.js",
     "postinstall": "webpack -p --config ./webpack.production.config.js --progress",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --forceExit"
+  },
+  "jest": {
+    "verbose": true
   },
   "engines": {
     "node": "8.9.1",
@@ -30,8 +33,11 @@
     "ws": "^5.0.0"
   },
   "devDependencies": {
+    "babel-jest": "^23.0.0-alpha.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
+    "jest": "^22.4.2",
+    "mock-socket": "^7.1.0",
     "nodemon": "^1.17.1",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.10"

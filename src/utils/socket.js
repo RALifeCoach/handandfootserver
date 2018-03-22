@@ -2,46 +2,70 @@ import WebSocket from 'ws';
 import UserProcesses from './../processes/userProcesses';
 import GameProcesses from './../processes/gameProcesses';
 
-class Socket {
+export class Socket {
     constructor() {
-        this.users = {};
         const wss = new WebSocket.Server({ port: 8092 });
 
-        wss.on('connection', function connection(socket) {
-            let user = null;
-            socket.send({
+        wss.on('connection', socket => {
+            let userData = null;
+            socket.send(JSON.stringify({
                 type: 'request token'
-            });
-            socket.on('message', message => {
-                if (!user) {
+            }));
+            socket.on('close', ()=>console.log('close'));
+            socket.on('message', response => {
+                const message = JSON.parse(response);
+                console.log(message.type);
+                if (!userData) {
                     if (message.type !== 'send token') {
-                        throw new Error('missing token');
+                        socket.send(JSON.stringify({type: 'error', message: 'error token not sent'}));
+                        return;
                     }
-                    user = UserProcesses.getUserFromToken(message.token);
-                    user.socket = socket;
-                    this.users[socket.id] = user;
+                    userData = UserProcesses.getUserFromToken(message.token);
+                    if (!userData) {
+                        console.log(message);
+                        socket.send(JSON.stringify({type: 'error', message: 'error token not found'}));
+                        return;
+                    }
+                    userData.socket = socket;
+                    socket.send(JSON.stringify({type: 'acknowledgement', success: true}));
+                    return;
                 }
-                this.processMessage(message, this.users[socket.id]);
+                this.processMessage(message, UserProcesses.getUserFromToken(message.token))
+                    .then(()=>{
+                        console.log('success');
+                    })
+                    .catch(err=>socket.send(JSON.stringify({
+                        type: 'acknowledgement',
+                        success: false,
+                        message: err.stack
+                    })));
             });
         });
     }
 
-    processMessage(message, user) {
+    async processMessage(message, userData) {
         switch (message.type) {
             case 'join game':
-                GameProcesses.joinGame(message.gameName, message.direction, user)
-                    .then(()=>{
-                        this.broadcastAll({
-                            type: 'player joined',
-                            user,
-                            direction: message.direction
-                        })
-                    })
-                    .catch(ex => {
-                        throw ex;
+                try {
+                    const gameStarted = await GameProcesses.joinGame(message.gameName, message.direction, userData);
+                    UserProcesses.broadcastToAllUsers({
+                        type: 'player joined',
+                        gameName: message.gameName,
+                        playerName: userData.user.name,
+                        direction: message.direction
                     });
+                    if (gameStarted) {
+                        UserProcesses.broadcastToAllUsers({
+                            type: 'game started',
+                            game: gameStarted
+                        });
+                    }
+                } catch(ex) {
+                    throw ex;
+                }
                 break;
             default:
+                await setTimeout(()=>{}, 0);
                 break;
         }
     }
