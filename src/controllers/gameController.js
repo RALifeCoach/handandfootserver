@@ -42,7 +42,7 @@ export default class GameController {
                         playerData.user = user;
                     }
                     resolve();
-                })
+                });
             })
         ))).then(() =>
             {

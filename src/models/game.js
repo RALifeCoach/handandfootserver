@@ -17,7 +17,7 @@ const GameSchema = new Schema({
                 ref: 'User',
                 type: Schema.Types.ObjectId
             },
-            connected: Boolean,
+            playerState: String,
             inHand: Boolean,
             hands: [ {
                 cards: [ cardSchema ],
@@ -29,8 +29,7 @@ const GameSchema = new Schema({
         salt: String,
         token: String
     },
-    gameComplete: Boolean,
-    gameStarted: Boolean,
+    gameState: String,
     teams: [
         {
             score: Number,
@@ -63,7 +62,9 @@ const GameSchema = new Schema({
     discardPile: {
         cards: [ cardSchema ]
     },
-    history: [ historySchema ]
+    history: [ historySchema ],
+    undo: [],
+    messages: []
 });
 
 export default mongoose.model('Game', GameSchema, 'Game');

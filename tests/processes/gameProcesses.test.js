@@ -1,5 +1,7 @@
 import gameProcesses from '../../src/processes/gameProcesses';
 import GameModel from '../../src/models/game';
+import GameRules from '../../src/events/gameRules';
+import { gameInitialized } from '../mocks/gameMocks';
 
 describe("Game Processes", ()=> {
     const module = gameProcesses;
@@ -17,60 +19,9 @@ describe("Game Processes", ()=> {
 
             const promise = module.createNewGame('game 2', { salt: 'salt', token: 'token' });
 
-            expect(GameModel.create).toHaveBeenCalledWith({
-                name: 'game 2',
-                password: { salt: 'salt', token: 'token' },
-                teams: [
-                    {
-                        score: 0,
-                        melds: []
-                    },
-                    {
-                        score: 0,
-                        melds: []
-                    }
-                ],
-                players: [{}, {}, {}, {}],
-                round: 0,
-                gameComplete: false,
-                gameStarted: false,
-                currentPlayer: -1,
-                piles: [],
-                discardPile: null,
-                historySchema: []
-            });
+            expect(GameModel.create).toHaveBeenCalledWith(gameInitialized.toJS());
             promise.then(()=>{
-                expect(module.game).toEqual({
-                    "currentPlayer": -1,
-                    "discardPile": null,
-                    "gameComplete": false,
-                    "gameStarted": false,
-                    "historySchema": [],
-                    "name": "game 2",
-                    "password": {
-                        "salt": "salt",
-                        "token": "token"
-                    },
-                    "piles": [],
-                    "players": [
-                        {},
-                        {},
-                        {},
-                        {}
-                    ],
-                    "round": 0,
-                    "save": jasmine.any(Function),
-                    "teams": [
-                        {
-                            "melds": [],
-                            "score": 0,
-                        },
-                        {
-                            "melds": [],
-                            "score": 0,
-                        }
-                    ]
-                });
+                expect(module.game).toEqual(Object.assign(gameModel, gameInitialized.toJS()));
                 done();
             });
         })
@@ -88,6 +39,8 @@ describe("Game Processes", ()=> {
             };
             game1 = {
                 name: 'game1',
+                gameState: 'state1',
+                players: [ { playerState: 'pstate1' }, 'player2', 'player3', 'player4' ],
                 save: jasmine.createSpy().and.returnValue(new Promise(resolve=>{
                     setTimeout(()=>resolve(game1Saved), 100);
                 }))
@@ -95,31 +48,16 @@ describe("Game Processes", ()=> {
             game1Saved = {
                 _id: 'saved id1',
                 name: 'game1',
+                players: [ 'player1', 'player2', 'player3', 'player4' ],
                 save: jasmine.createSpy().and.returnValue(new Promise(resolve=>{
                     setTimeout(()=>resolve(game1), 100);
                 }))
             };
+            module.game = game1;
             spyOn(GameModel, 'findOne').and.callFake(gameName=> {
-                console.log(game1);
-                console.log('game1');
                 return new Promise(resolve => {
                     setTimeout(() => {
-                        if (gameName === 'game1') {
-                            console.log(game1);
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
-                            console.log('game1');
+                        if (gameName.name === 'game1') {
                             resolve(game1);
                         } else {
                             resolve(null);
@@ -127,16 +65,12 @@ describe("Game Processes", ()=> {
                     }, 100);
                 });
             });
+            spyOn(GameRules, 'validateStatesAndActions').and.returnValue('action');
+            spyOn(GameRules, 'performValidationAndAction');
         });
 
         test("Fetch the game (game already present).", (done) =>{
-            module.game = game1;
-            updateGame = updateData => {
-                expect(updateData).toBe('updateData');
-                expect(module.game).toEqual(game1);
-            };
-
-            const promise = module.updateGame('game1', 'updateData', updateGame)
+            const promise = module.updateGame('game1', 0, 'action', 'updateData')
                 .then(()=>{
                     expect(module.game).toBe(game1Saved);
                     done();
@@ -148,12 +82,8 @@ describe("Game Processes", ()=> {
 
         test("Fetch the game (game present, names !=).", (done) =>{
             module.game = game0;
-            updateGame = updateData => {
-                expect(updateData).toBe('updateData');
-                expect(module.game).toEqual(game1);
-            };
 
-            const promise = module.updateGame('game1', 'updateData', updateData=>updateGame(updateData))
+            const promise = module.updateGame('game1', 0, 'action', 'updateData')
                 .then(()=>{
                     expect(module.game).toBe(game1Saved);
                     done();
@@ -163,155 +93,120 @@ describe("Game Processes", ()=> {
                 });
         });
 
-    //     test("Fetch the game (game not present).", (done) =>{
-    //         module.game = null;
-    //         updateGame = updateData => {
-    //             expect(updateData).toBe('updateData');
-    //             expect(module.game).toEqual(game1);
-    //         };
-    //
-    //         const promise = module.updateGame('game1', 'updateData', updateData=>updateGame(updateData))
-    //             .then(()=>{
-    //                 expect(module.game).toBe(game1Saved);
-    //                 done();
-    //             });
-    //     });
-    //
-    //     test("Fetch the game (game not found).", (done) =>{
-    //         module.game = null;
-    //         updateGame = jasmine.createSpy();
-    //
-    //         const promise = module.updateGame('game1', 'updateData', updateData=>updateGame(updateData))
-    //             .then(()=>{
-    //                 fail('should have throw error');
-    //             })
-    //             .catch(err=>{
-    //                 expect(err.message).toBe('game2 not found');
-    //                 done();
-    //             });
-    //     });
+        test("Fetch the game (game not present).", (done) =>{
+            module.game = null;
+
+            const promise = module.updateGame('game1', 0, 'action', 'updateData')
+                .then(()=>{
+                    expect(module.game).toBe(game1Saved);
+                    done();
+                })
+                .catch(err=>{
+                    fail(err.message);
+                });
+        });
+
+        test("Fetch the game (game not found).", (done) =>{
+            const promise = module.updateGame('game2', 0, 'action', 'updateData')
+                .then(()=>{
+                    fail('should have throw error');
+                })
+                .catch(err=>{
+                    expect(err.message).toBe('game2 not found');
+                    done();
+                });
+        });
+
+        test("Error - invalid player index", (done)=>{
+            const promise = module.updateGame('game1', 5, 'action', 'updateData')
+                .then(()=>{
+                    fail('should have throw error');
+                })
+                .catch(err=>{
+                    expect(err.message).toBe('player not found at index 5');
+                    done();
+                });
+        });
+
+        test("Call GameRules", (done)=>{
+            const promise = module.updateGame('game1', 0, 'actionType', 'updateData')
+                .then(()=>{
+                    expect(GameRules.validateStatesAndActions)
+                        .toHaveBeenCalledWith('state1', 'pstate1', 'actionType', 'updateData');
+                    expect(GameRules.performValidationAndAction)
+                        .toHaveBeenCalledWith('action', game1, {"playerState": "pstate1"}, 'updateData');
+                    done();
+                })
+                .catch(err=>{
+                    fail('should not have throw error - ' + err.message);
+                });
+        });
     });
-    //
-    // describe("addPlayers", () => {
-    //     let game;
-    //
-    //     beforeEach(()=>{
-    //         game = {
-    //             name: 'game0',
-    //             players: [ {}, {}, {}, {} ],
-    //             save: jasmine.createSpy().and.callFake(fn=>{
-    //                 fn(null, module.game)
-    //             })
-    //         };
-    //         module.game = game;
-    //         spyOn(module, 'fetchGame').and.returnValue(new Promise(resolve=>setTimeout(()=>{
-    //             module.game = game;
-    //             resolve();
-    //         }, 100)));
-    //     });
-    //
-    //     test("add 1 player to game (module.game, name !=).", (done) =>{
-    //         const players = [
-    //             {
-    //                 directionData: {
-    //                     playerIndex: 0
-    //                 },
-    //                 user: 'user 1'
-    //             }
-    //         ];
-    //
-    //         const promise = module.addPlayers('game1', players);
-    //
-    //         expect(module.fetchGame).toHaveBeenCalledWith('game1');
-    //         promise.then(()=> {
-    //             expect(module.game).toEqual({
-    //                 save: jasmine.any(Function),
-    //                 name: 'game0',
-    //                 players: [
-    //                     {
-    //                         user: 'user 1',
-    //                         connected: false
-    //                     },
-    //                     {}, {}, {}
-    //                 ]
-    //             });
-    //             done();
-    //         });
-    //     });
-    //
-    //     test("add 1 player to game (!module.game).", (done) =>{
-    //         module.game = null;
-    //         const players = [
-    //             {
-    //                 directionData: {
-    //                     playerIndex: 0
-    //                 },
-    //                 user: 'user 1'
-    //             }
-    //         ];
-    //
-    //         const promise = module.addPlayers('game1', players);
-    //
-    //         expect(module.fetchGame).toHaveBeenCalledWith('game1');
-    //         promise.then(()=> {
-    //             expect(module.game).toEqual({
-    //                 save: jasmine.any(Function),
-    //                 name: 'game0',
-    //                 players: [
-    //                     {
-    //                         user: 'user 1',
-    //                         connected: false
-    //                     },
-    //                     {}, {}, {}
-    //                 ]
-    //             });
-    //             done();
-    //         });
-    //     });
-    //
-    //     test("add 2 players to game (module.game).", (done) =>{
-    //         const players = [
-    //             {
-    //                 directionData: {
-    //                     playerIndex: 0
-    //                 },
-    //                 user: 'user 1'
-    //             },
-    //             {
-    //                 directionData: {
-    //                     playerIndex: 1
-    //                 },
-    //                 user: 'user 2'
-    //             }
-    //         ];
-    //
-    //         const promise = module.addPlayers('game0', players);
-    //
-    //         expect(module.fetchGame).not.toHaveBeenCalled();
-    //         promise.then(()=> {
-    //             expect(module.game).toEqual({
-    //                 save: jasmine.any(Function),
-    //                 name: 'game0',
-    //                 players: [
-    //                     {
-    //                         user: 'user 1',
-    //                         connected: false
-    //                     },
-    //                     {
-    //                         user: 'user 2',
-    //                         connected: false
-    //                     },
-    //                     {}, {}
-    //                 ]
-    //             });
-    //             done();
-    //         });
-    //     });
-    // });
-    //
-    // describe("joinGame", ()=>{
-    //     beforeEach(()=>{
-    //         spyOn(GameModel, 'default').and.returnValue();
-    //     });
-    // });
+
+    describe("addPlayers", () => {
+        beforeEach(()=>{
+            module.game = {
+                name: 'game0',
+                players: [ {}, {}, {}, {} ]
+            };
+        });
+
+        test("add 1 player to game.", () =>{
+            const players = [
+                {
+                    directionData: {
+                        playerIndex: 0
+                    },
+                    user: 'user 1'
+                }
+            ];
+
+            const promise = module.addPlayers({players});
+
+            expect(module.game).toEqual({
+                name: 'game0',
+                players: [
+                    {
+                        user: 'user 1',
+                        connected: false
+                    },
+                    {}, {}, {}
+                ]
+            });
+        });
+
+        test("add 2 players to game (module.game).", () =>{
+            const players = [
+                {
+                    directionData: {
+                        playerIndex: 0
+                    },
+                    user: 'user 1'
+                },
+                {
+                    directionData: {
+                        playerIndex: 1
+                    },
+                    user: 'user 2'
+                }
+            ];
+
+            const promise = module.addPlayers({players});
+
+            expect(module.game).toEqual({
+                name: 'game0',
+                players: [
+                    {
+                        user: 'user 1',
+                        connected: false
+                    },
+                    {
+                        user: 'user 2',
+                        connected: false
+                    },
+                    {}, {}
+                ]
+            });
+        });
+    });
 });

@@ -1,19 +1,19 @@
 import { Range } from 'immutable';
-import { suits } from '../constants';
+import {directions, suits} from '../constants';
 
 export default class GameEvents {
     static startGame(game) {
         game.gameStarted = true;
         game.gameComplete = false;
         // these values will be incremented in startHand
-        game.round = 0;
+        game.roundId = 0;
         game.currentPlayer = Math.floor(Math.random() * Math.floor(4));
 
         GameEvents.startHand(game);
     }
 
     static startHand(game) {
-        game.round += 1;
+        game.roundId += 1;
         game.currentPlayer = (game.currentPlayer + 1) % 4;
         game.currentPlayerState = 'draw';
         game.teams.forEach(team=>{
@@ -47,5 +47,84 @@ export default class GameEvents {
         });
 
         game.discardPile = { cards: [] };
+    }
+
+    static joinGame(game, player, updateData) {
+        Object.assign(player, {
+            connected: true,
+            user: updateData.user
+        });
+
+        // this player is fourth player to join
+        if (!Boolean(game.players.find(player=>!player.user || !player.connected))) {
+            GameEvents.startGame(game);
+        }
+    }
+
+    static drawFromPile(game, player, updateData) {
+        const pile = game.piles[updateData.pileIndex];
+        const hand = player.inHand ? player.hands[0] : player.hands[1];
+        const card = pile.cards.pop();
+        hand.cards.push(card);
+    }
+
+    static drawFromDiscard(game, updateData) {
+
+    }
+
+    static addToBoard(game, updateData) {
+
+    }
+
+    static discard(game, updateData) {
+
+    }
+
+    static resignRequest(game, updateData) {
+
+    }
+
+    static sortMelds(game, updateData) {
+
+    }
+
+    static sortRuns(game, updateData) {
+
+    }
+
+    static pinCard(game, updateData) {
+
+    }
+
+    static unpinCard(game, updateData) {
+
+    }
+
+    static undo(game, updateData) {
+
+    }
+
+    static acceptResign(game, updateData) {
+
+    }
+
+    static cancelResign(game, updateData) {
+
+    }
+
+    static acceptEnd(game, updateData) {
+
+    }
+
+    static cancelEnd(game, updateData) {
+
+    }
+
+    static acceptDiscard(game, updateData) {
+
+    }
+
+    static cancelDiscard(game, updateData) {
+
     }
 }
