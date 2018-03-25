@@ -124,6 +124,7 @@ class UserProcesses {
             player.handCounts = player.hands.map(hand=>hand.cards.length);
             delete player.hands;
         });
+        game.undoCount = game.undo.length;
         message.game = game;
         return originalGame;
     }

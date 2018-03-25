@@ -1,7 +1,7 @@
 import userProcesses from '../../src/processes/userProcesses';
 import { directions } from '../../src/constants';
 import { Range } from 'immutable';
-import { gameInProgress } from '../mocks/gameMocks';
+import { gameInProgressPlay } from '../mocks/gameMocks';
 
 describe("User Processes", ()=>{
     const module = userProcesses;
@@ -11,7 +11,7 @@ describe("User Processes", ()=>{
         let game;
 
         beforeEach(()=>{
-            game = gameInProgress.toJS();
+            game = gameInProgressPlay.toJS();
             module.users = directions.reduce((users, direction, directionIndex)=>Object.assign(users,
                 {
                     [game.players[directionIndex].user.password.token]: {

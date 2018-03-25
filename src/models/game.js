@@ -11,6 +11,23 @@ const GameSchema = new Schema({
         required: true,
         unique: true
     },
+    password: {
+        salt: String,
+        token: String
+    },
+    gameState: String,
+    roundId: Number,
+    teams: [
+        {
+            score: Number,
+            teamState: String,
+            melds: [
+                {
+                }
+            ]
+        }
+    ],
+    currentPlayerIndex: Number,
     players: [
         {
             user: {
@@ -18,6 +35,7 @@ const GameSchema = new Schema({
                 type: Schema.Types.ObjectId
             },
             playerState: String,
+            cardsToDraw: Number,
             inHand: Boolean,
             hands: [ {
                 cards: [ cardSchema ],
@@ -25,40 +43,12 @@ const GameSchema = new Schema({
             } ]
         }
     ],
-    password: {
-        salt: String,
-        token: String
-    },
-    gameState: String,
-    teams: [
-        {
-            score: Number,
-            melds: [
-                {
-                    type: String,
-                    cardValue: {
-                        type: Number,
-                        min: 0,
-                        max: 12
-                    },
-                    suit: {
-                        type: String,
-                        enum: ['Club', 'Diamond', 'Heart', 'Spade', 'Joker' ],
-                    },
-                    meldComplete: Boolean,
-                    cards: [ cardSchema ]
-                }
-            ]
-        }
-    ],
-    roundId: Number,
-    currentPlayerIndex: Number,
-    currentPlayerState: String,
     piles: [
         {
             cards: [ cardSchema ]
         }
     ],
+    discardPileLocked: Boolean,
     discardPile: {
         cards: [ cardSchema ]
     },

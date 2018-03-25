@@ -1,6 +1,7 @@
 import GameModel from '../models/game';
 import GameRules from '../events/gameRules';
 import { directions, undoOptions, playerStates, gameStates } from './../constants';
+import {playerIndexToTeamIndex, teamStates} from "../constants";
 
 class GameProcesses {
     constructor() {
@@ -22,13 +23,16 @@ class GameProcesses {
         if (!player) {
             throw new Error('player not found at index ' + playerIndex);
         }
+        const team = this.game.teams[playerIndexToTeamIndex[playerIndex]];
 
-        try {
-            const action = GameRules.validateStatesAndActions(this.game.gameState, player.playerState,
-                actionType, updateData);
-            GameRules.performValidationAndAction(action, this.game, player, updateData);
-        } catch(err) {
-            throw err;
+        const { stateErr, action } = GameRules.validateStatesAndActions(this.game.gameState, player.playerState,
+            actionType, updateData);
+        if (stateErr) {
+            throw new Error(stateErr);
+        }
+        const actionErr = GameRules.performValidationAndAction(action, this.game, player, team, updateData);
+        if (actionErr) {
+            throw new Error(actionErr);
         }
 
         try {
@@ -54,21 +58,26 @@ class GameProcesses {
             name: gameName,
             password,
             teams: [
-                { score: 0, melds: [] },
-                { score: 0, melds: [] }
+                { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] },
+                { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] }
             ],
             players: [
-                {playerState: playerStates.NOT_JOINED},
-                {playerState: playerStates.NOT_JOINED},
-                {playerState: playerStates.NOT_JOINED},
-                {playerState: playerStates.NOT_JOINED}
+                { "connected": false, "hands": [{"cards": [], "sort": "none"},
+                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
+                { "connected": false, "hands": [{"cards": [], "sort": "none"},
+                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
+                { "connected": false, "hands": [{"cards": [], "sort": "none"},
+                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
+                { "connected": false, "hands": [{"cards": [], "sort": "none"},
+                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED }
             ],
             roundId: 0,
             gameState: gameStates.NOT_STARTED,
             currentPlayerIndex: -1,
             piles: [ { cards: [] }, { cards: [] }, { cards: [] }, { cards: [] } ],
+            discardPileLocked: false,
             discardPile: [ { cards: [] } ],
-            historySchema: [],
+            history: [],
             undo: [],
             messages: [],
         });

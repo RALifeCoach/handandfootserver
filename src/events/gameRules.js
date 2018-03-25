@@ -34,7 +34,12 @@ class GameRules {
                         undo: undoOptions.CLEAR
                     }
                 },
-                [playerStates.ON_TABLE]: {
+                [playerStates.PLAY]: {
+                    [actions.ADD_TO_MELD]: {
+                        validation: GameValidations.addToBoard,
+                        execution: GameEvents.addToBoard,
+                        undo: undoOptions.SAVE
+                    },
                     [actions.ADD_TO_BOARD]: {
                         validation: GameValidations.addToBoard,
                         execution: GameEvents.addToBoard,
@@ -55,18 +60,6 @@ class GameRules {
                     [actions.CANCEL]: {
                         validation: null,
                         execution: GameEvents.cancelDiscard,
-                        undo: undoOptions.NA
-                    }
-                },
-                [playerStates.NOT_ON_TABLE]: {
-                    [actions.ADD_TO_BOARD]: {
-                        validation: GameValidations.addToBoard,
-                        execution: GameEvents.addToBoard,
-                        undo: undoOptions.SAVE
-                    },
-                    [actions.DISCARD]: {
-                        validation: GameValidations.discard,
-                        execution: GameEvents.discard,
                         undo: undoOptions.NA
                     }
                 },
@@ -144,33 +137,32 @@ class GameRules {
     validateStatesAndActions(gameState, playerState, actionType) {
         const gameRule = this.rules[gameState];
         if (!gameRule) {
-            throw new Error('Invalid game state: ' + gameState);
+            return { stateErr: 'Invalid game state: ' + gameState };
         }
         const playerRule = gameRule[playerState];
         if (!playerRule) {
-            throw new Error(`Invalid game/player state: ${gameState}/${playerState}`);
+            return { stateErr: `Invalid game/player state: ${gameState}/${playerState}` };
         }
         const action = playerRule[actionType];
         if (!action) {
-            throw new Error(`Invalid game/player/action: ${gameState}/${playerState}/${actionType}`);
+            return { stateErr: `Invalid game/player/action: ${gameState}/${playerState}/${actionType}` };
         }
-        return action;
+        return { action };
     }
 
-    performValidationAndAction(action, game, player, updateData) {
-        try {
-            if (action.validation) {
-                action.validation(game, player, updateData);
+    performValidationAndAction(action, game, player, team, updateData) {
+        if (action.validation) {
+            const err = action.validation(game, player, team, updateData);
+            if (err) {
+                return err;
             }
-            if (action.undo === undoOptions.SAVE) {
-                game.undo.push(JSON.parse(JSON.stringify(game)));
-            }
-            action.execution(game, player, updateData);
-            if (action.undo === undoOptions.CLEAR) {
-                game.undo = [];
-            }
-        } catch (err) {
-            throw err;
+        }
+        if (action.undo === undoOptions.SAVE) {
+            game.undo.push(JSON.parse(JSON.stringify(game)));
+        }
+        action.execution(game, player, team, updateData);
+        if (action.undo === undoOptions.CLEAR) {
+            game.undo = [];
         }
     }
 }

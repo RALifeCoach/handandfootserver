@@ -21,13 +21,29 @@ export const directions = [
     }
 ];
 
+export const playerIndexToTeamIndex = {
+    0: 0,
+    1: 1,
+    2: 0,
+    3: 1,
+};
+
 export const suits = [
     'Club', 'Diamond', 'Heart', 'Spade', 'Joker'
 ];
 
-export const sorts = [
-    'none', 'melds', 'runs'
-];
+export const sorts = {
+    NONE: 'none',
+    MELDS: 'melds',
+    RUNS: 'runs'
+};
+
+export const meldTypes = {
+    MELD: 'meld',
+    RUN: 'run',
+    WILD_CARDS: 'wild cards',
+    RED_THREE: 'red three'
+};
 
 export const gameStates = {
     NOT_STARTED: 'not started',
@@ -41,12 +57,16 @@ export const playerStates = {
     NOT_JOINED: 'not joined',
     INITIAL_DRAW: 'initial draw',
     DRAW: 'draw',
-    ON_TABLE: 'on table',
-    NOT_ON_TABLE: 'not on table',
+    PLAY: 'play',
     UP7_PENDING: 'up 7 pending',
     DISCARD_PENDING: 'discard pending',
     WAIT: 'wait',
     ANY: ''
+};
+
+export const teamStates = {
+    ON_TABLE: 'on table',
+    NOT_ON_TABLE: 'not on table'
 };
 
 export const actions = {
@@ -54,6 +74,7 @@ export const actions = {
     UP7_DRAW: 'draw discard',
     JOIN_GAME: 'join game',
     ADD_TO_BOARD: 'add to board',
+    ADD_TO_MELD: 'add to meld',
     DISCARD: 'discard',
     RESIGN_REQUEST: 'resign request',
     SORT_MELDS: 'sort melds',

@@ -1,38 +1,44 @@
 import { Range } from 'immutable';
-import {directions, suits} from '../constants';
+import {directions, gameStates, playerStates, suits, teamStates} from '../constants';
 
 export default class GameEvents {
     static startGame(game) {
-        game.gameStarted = true;
-        game.gameComplete = false;
+        game.gameState = gameStates.IN_PROGRESS;
         // these values will be incremented in startHand
         game.roundId = 0;
-        game.currentPlayer = Math.floor(Math.random() * Math.floor(4));
+        game.currentPlayerIndex = Math.floor(Math.random() * Math.floor(4));
 
         GameEvents.startHand(game);
     }
 
     static startHand(game) {
         game.roundId += 1;
-        game.currentPlayer = (game.currentPlayer + 1) % 4;
-        game.currentPlayerState = 'draw';
+        game.currentPlayerIndex = (game.currentPlayerIndex + 1) % 4;
         game.teams.forEach(team=>{
             team.melds = [];
+            team.teamState = teamStates.NOT_ON_TABLE;
         });
 
-        Range(0, 4).forEach(playerIndex=>{
-            game.players[playerIndex].hands = [ { cards: [], sort: 'none' }, { cards: [], sort: 'none' } ];
+        game.players.forEach((player, playerIndex)=>{
+            player.hands = [ { cards: [], sort: 'none' }, { cards: [], sort: 'none' } ];
+            player.playerState =
+                game.currentPlayerIndex === playerIndex ? playerStates.INITIAL_DRAW : playerStates.WAIT;
+            player.cardsToDraw = game.currentPlayerIndex === playerIndex ? 2 : 0;
         });
-
-        let allCards = Range(0, 6 * 54).map(cardIndex=>(
-            {
-                suit: suits[Math.floor((cardIndex % 54) / 13)],
-                value: cardIndex % 54 % 13,
-                pinnedSeq: -1
-            }
-        )).toList();
-
         game.piles = [ { cards: [] }, { cards: [] }, { cards: [] }, { cards: [] } ];
+
+        let allCards = Range(0, 6 * 54).map(cardIndex=> {
+            const suit = suits[Math.floor((cardIndex % 54) / 13)];
+            const value = suit === 4 ? -1 : cardIndex % 54 % 13;
+            return {
+                suit,
+                value,
+                pinnedSeq: -1,
+                isWild: suit === 4 || value === 0,
+                isRedThree: (suit === 1 || suit === 2) && value === 2
+            };
+        }).toList();
+
         Range(0, 6 * 54 - 4 * 22).forEach(()=>{
             const pileIndex = Math.floor(Math.random() * Math.floor(4));
             const cardIndex = Math.floor(Math.random() * Math.floor(allCards.size));
@@ -46,13 +52,15 @@ export default class GameEvents {
             allCards = allCards.deleteIn([cardIndex]);
         });
 
+        game.discardPileLocked = false;
         game.discardPile = { cards: [] };
     }
 
-    static joinGame(game, player, updateData) {
+    static joinGame(game, player, team, updateData) {
         Object.assign(player, {
             connected: true,
-            user: updateData.user
+            user: updateData.user,
+            playerState: playerStates.WAIT
         });
 
         // this player is fourth player to join
@@ -61,70 +69,79 @@ export default class GameEvents {
         }
     }
 
-    static drawFromPile(game, player, updateData) {
+    static drawFromPile(game, player, team, updateData) {
         const pile = game.piles[updateData.pileIndex];
         const hand = player.inHand ? player.hands[0] : player.hands[1];
         const card = pile.cards.pop();
         hand.cards.push(card);
+        player.cardsToDraw -= 1;
+        if (!player.cardsToDraw) {
+            player.playerState = playerStates.PLAY;
+        } else {
+            player.playerState = playerStates.DRAW;
+        }
     }
 
-    static drawFromDiscard(game, updateData) {
-
+    static drawFromDiscard(game, player, team, updateData) {
+        const hand = player.inHand ? player.hands[0] : player.hands[1];
+        const card = game.discardPile.cards.pop();
+        hand.cards.push(card);
+        player.playerState = playerStates.UP7_PENDING;
     }
 
-    static addToBoard(game, updateData) {
-
-    }
-
-    static discard(game, updateData) {
-
-    }
-
-    static resignRequest(game, updateData) {
-
-    }
-
-    static sortMelds(game, updateData) {
+    static addToBoard(game, player, team, updateData) {
 
     }
 
-    static sortRuns(game, updateData) {
+    static discard(game, player, team, updateData) {
 
     }
 
-    static pinCard(game, updateData) {
+    static resignRequest(game, player, team, updateData) {
 
     }
 
-    static unpinCard(game, updateData) {
+    static sortMelds(game, player, team, updateData) {
 
     }
 
-    static undo(game, updateData) {
+    static sortRuns(game, player, team, updateData) {
 
     }
 
-    static acceptResign(game, updateData) {
+    static pinCard(game, player, team, updateData) {
 
     }
 
-    static cancelResign(game, updateData) {
+    static unpinCard(game, player, team, updateData) {
 
     }
 
-    static acceptEnd(game, updateData) {
+    static undo(game, player, team, updateData) {
 
     }
 
-    static cancelEnd(game, updateData) {
+    static acceptResign(game, player, team, updateData) {
 
     }
 
-    static acceptDiscard(game, updateData) {
+    static cancelResign(game, player, team, updateData) {
 
     }
 
-    static cancelDiscard(game, updateData) {
+    static acceptEnd(game, player, team, updateData) {
+
+    }
+
+    static cancelEnd(game, player, team, updateData) {
+
+    }
+
+    static acceptDiscard(game, player, team, updateData) {
+
+    }
+
+    static cancelDiscard(game, player, team, updateData) {
 
     }
 }

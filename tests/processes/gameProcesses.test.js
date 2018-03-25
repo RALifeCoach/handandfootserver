@@ -41,6 +41,7 @@ describe("Game Processes", ()=> {
                 name: 'game1',
                 gameState: 'state1',
                 players: [ { playerState: 'pstate1' }, 'player2', 'player3', 'player4' ],
+                teams: [ 'team1', 'team2' ],
                 save: jasmine.createSpy().and.returnValue(new Promise(resolve=>{
                     setTimeout(()=>resolve(game1Saved), 100);
                 }))
@@ -65,7 +66,7 @@ describe("Game Processes", ()=> {
                     }, 100);
                 });
             });
-            spyOn(GameRules, 'validateStatesAndActions').and.returnValue('action');
+            spyOn(GameRules, 'validateStatesAndActions').and.returnValue({action: 'action'});
             spyOn(GameRules, 'performValidationAndAction');
         });
 
@@ -134,7 +135,7 @@ describe("Game Processes", ()=> {
                     expect(GameRules.validateStatesAndActions)
                         .toHaveBeenCalledWith('state1', 'pstate1', 'actionType', 'updateData');
                     expect(GameRules.performValidationAndAction)
-                        .toHaveBeenCalledWith('action', game1, {"playerState": "pstate1"}, 'updateData');
+                        .toHaveBeenCalledWith('action', game1, {"playerState": "pstate1"}, 'team1', 'updateData');
                     done();
                 })
                 .catch(err=>{

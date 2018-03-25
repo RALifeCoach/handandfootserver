@@ -32,7 +32,12 @@ export class Socket {
                 }
                 this.processMessage(message, UserProcesses.getUserFromToken(message.token))
                     .then(()=>{
-                        console.log('success');
+                        UserProcesses.broadcastToAllUsers({
+                            type: 'player joined',
+                            gameName: message.gameName,
+                            playerName: userData.user.name,
+                            direction: message.direction
+                        });
                     })
                     .catch(err=>socket.send(JSON.stringify({
                         type: 'acknowledgement',
@@ -48,18 +53,6 @@ export class Socket {
             case 'join game':
                 try {
                     const gameStarted = await GameProcesses.joinGame(message.gameName, message.direction, userData);
-                    UserProcesses.broadcastToAllUsers({
-                        type: 'player joined',
-                        gameName: message.gameName,
-                        playerName: userData.user.name,
-                        direction: message.direction
-                    });
-                    if (gameStarted) {
-                        UserProcesses.broadcastToAllUsers({
-                            type: 'game started',
-                            game: gameStarted
-                        });
-                    }
                 } catch(ex) {
                     throw ex;
                 }
