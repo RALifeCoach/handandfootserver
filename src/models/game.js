@@ -1,9 +1,9 @@
 // get an instance of mongoose and mongoose.Schema
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
-
-import historySchema from './history';
-import cardSchema from './card';
+import MeldSchema from './meld';
+import HistorySchema from './history';
+import CardSchema from './card';
 
 const GameSchema = new Schema({
     name: {
@@ -19,12 +19,9 @@ const GameSchema = new Schema({
     roundId: Number,
     teams: [
         {
-            score: Number,
+            scorePriorHands: Number,
             teamState: String,
-            melds: [
-                {
-                }
-            ]
+            melds: [ MeldSchema ]
         }
     ],
     currentPlayerIndex: Number,
@@ -34,25 +31,26 @@ const GameSchema = new Schema({
                 ref: 'User',
                 type: Schema.Types.ObjectId
             },
+            discard: CardSchema,
             playerState: String,
             cardsToDraw: Number,
             inHand: Boolean,
             hands: [ {
-                cards: [ cardSchema ],
+                cards: [ CardSchema ],
                 sort: String
             } ]
         }
     ],
     piles: [
         {
-            cards: [ cardSchema ]
+            cards: [ CardSchema ]
         }
     ],
     discardPileLocked: Boolean,
     discardPile: {
-        cards: [ cardSchema ]
+        cards: [ CardSchema ]
     },
-    history: [ historySchema ],
+    history: [ HistorySchema ],
     undo: [],
     messages: []
 });

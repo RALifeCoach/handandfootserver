@@ -9,13 +9,11 @@ export default new Schema({
         type: String
     },
     cardValue: {
-        required: true,
         type: Number,
         min: 0,
         max: 12
     },
     suit: {
-        required: true,
         type: String,
         enum: suits,
     },

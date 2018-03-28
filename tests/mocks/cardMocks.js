@@ -7,6 +7,13 @@ export const redThree = {
     isRedThree: true
 };
 
+export const blackThree = {
+    suit: suits[0],
+    value: 1,
+    isWild: false,
+    isRedThree: false
+};
+
 export const joker = {
     suit: suits[4],
     value: 0,

@@ -2,10 +2,9 @@ import gameProcesses from '../../src/processes/gameProcesses';
 import GameModel from '../../src/models/game';
 import GameRules from '../../src/events/gameRules';
 import { gameInitialized } from '../mocks/gameMocks';
+import UserProcesses from "../../src/processes/userProcesses";
 
 describe("Game Processes", ()=> {
-    const module = gameProcesses;
-
     describe("createNewGame", () => {
         test("create new game and save it to the db", (done)=>{
             const gameModel = {
@@ -17,11 +16,11 @@ describe("Game Processes", ()=> {
             };
             spyOn(GameModel, 'create').and.callFake(game=>Object.assign(gameModel, game));
 
-            const promise = module.createNewGame('game 2', { salt: 'salt', token: 'token' });
+            const promise = gameProcesses.createNewGame('game 2', { salt: 'salt', token: 'token' });
 
             expect(GameModel.create).toHaveBeenCalledWith(gameInitialized.toJS());
             promise.then(()=>{
-                expect(module.game).toEqual(Object.assign(gameModel, gameInitialized.toJS()));
+                expect(gameProcesses.game).toEqual(Object.assign(gameModel, gameInitialized.toJS()));
                 done();
             });
         })
@@ -30,8 +29,7 @@ describe("Game Processes", ()=> {
     describe("updateGame", () => {
         let game0,
             game1,
-            game1Saved,
-            updateGame;
+            game1Saved;
 
         beforeEach(()=>{
             game0 = {
@@ -54,7 +52,7 @@ describe("Game Processes", ()=> {
                     setTimeout(()=>resolve(game1), 100);
                 }))
             };
-            module.game = game1;
+            gameProcesses.game = game1;
             spyOn(GameModel, 'findOne').and.callFake(gameName=> {
                 return new Promise(resolve => {
                     setTimeout(() => {
@@ -68,12 +66,14 @@ describe("Game Processes", ()=> {
             });
             spyOn(GameRules, 'validateStatesAndActions').and.returnValue({action: 'action'});
             spyOn(GameRules, 'performValidationAndAction');
+            spyOn(UserProcesses, 'broadcastToAllUsers');
         });
 
         test("Fetch the game (game already present).", (done) =>{
-            const promise = module.updateGame('game1', 0, 'action', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game1', direction: 'North', type: 'action', updateData: 'updateData'})
                 .then(()=>{
-                    expect(module.game).toBe(game1Saved);
+                    expect(gameProcesses.game).toBe(game1Saved);
                     done();
                 })
                 .catch(err=>{
@@ -82,11 +82,12 @@ describe("Game Processes", ()=> {
         });
 
         test("Fetch the game (game present, names !=).", (done) =>{
-            module.game = game0;
+            gameProcesses.game = game0;
 
-            const promise = module.updateGame('game1', 0, 'action', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game1', direction: 'North', type: 'action', updateData: 'updateData'})
                 .then(()=>{
-                    expect(module.game).toBe(game1Saved);
+                    expect(gameProcesses.game).toBe(game1Saved);
                     done();
                 })
                 .catch(err=>{
@@ -95,11 +96,12 @@ describe("Game Processes", ()=> {
         });
 
         test("Fetch the game (game not present).", (done) =>{
-            module.game = null;
+            gameProcesses.game = null;
 
-            const promise = module.updateGame('game1', 0, 'action', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game1', direction: 'North', type: 'action', updateData: 'updateData'})
                 .then(()=>{
-                    expect(module.game).toBe(game1Saved);
+                    expect(gameProcesses.game).toBe(game1Saved);
                     done();
                 })
                 .catch(err=>{
@@ -108,7 +110,8 @@ describe("Game Processes", ()=> {
         });
 
         test("Fetch the game (game not found).", (done) =>{
-            const promise = module.updateGame('game2', 0, 'action', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game2', direction: 'North', type: 'action', updateData: 'updateData'})
                 .then(()=>{
                     fail('should have throw error');
                 })
@@ -119,18 +122,20 @@ describe("Game Processes", ()=> {
         });
 
         test("Error - invalid player index", (done)=>{
-            const promise = module.updateGame('game1', 5, 'action', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game1', direction: 'xxxxx', type: 'action', updateData: 'updateData'})
                 .then(()=>{
                     fail('should have throw error');
                 })
                 .catch(err=>{
-                    expect(err.message).toBe('player not found at index 5');
+                    expect(err.message).toBe('player not found at direction xxxxx');
                     done();
                 });
         });
 
         test("Call GameRules", (done)=>{
-            const promise = module.updateGame('game1', 0, 'actionType', 'updateData')
+            const promise = gameProcesses
+                .updateGame({gameName: 'game1', direction: 'North', type: 'actionType', updateData: 'updateData'})
                 .then(()=>{
                     expect(GameRules.validateStatesAndActions)
                         .toHaveBeenCalledWith('state1', 'pstate1', 'actionType', 'updateData');
@@ -146,7 +151,7 @@ describe("Game Processes", ()=> {
 
     describe("addPlayers", () => {
         beforeEach(()=>{
-            module.game = {
+            gameProcesses.game = {
                 name: 'game0',
                 players: [ {}, {}, {}, {} ]
             };
@@ -162,9 +167,9 @@ describe("Game Processes", ()=> {
                 }
             ];
 
-            const promise = module.addPlayers({players});
+            const promise = gameProcesses.addPlayers({players});
 
-            expect(module.game).toEqual({
+            expect(gameProcesses.game).toEqual({
                 name: 'game0',
                 players: [
                     {
@@ -176,7 +181,7 @@ describe("Game Processes", ()=> {
             });
         });
 
-        test("add 2 players to game (module.game).", () =>{
+        test("add 2 players to game (gameProcesses.game).", () =>{
             const players = [
                 {
                     directionData: {
@@ -192,9 +197,9 @@ describe("Game Processes", ()=> {
                 }
             ];
 
-            const promise = module.addPlayers({players});
+            const promise = gameProcesses.addPlayers({players});
 
-            expect(module.game).toEqual({
+            expect(gameProcesses.game).toEqual({
                 name: 'game0',
                 players: [
                     {

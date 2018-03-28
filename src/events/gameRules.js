@@ -1,5 +1,5 @@
 import { gameStates, playerStates, actions, undoOptions } from '../constants';
-import GameEvents from './gameEvents';
+import GameEvents from './gameActions';
 import GameValidations from './gameValidations';
 
 class GameRules {
@@ -64,6 +64,11 @@ class GameRules {
                     }
                 },
                 [playerStates.UP7_PENDING]: {
+                    [actions.ADD_TO_MELD]: {
+                        validation: GameValidations.addToMeld,
+                        execution: GameEvents.addToMeld,
+                        undo: undoOptions.SAVE
+                    },
                     [actions.ADD_TO_BOARD]: {
                         validation: GameValidations.addToBoard,
                         execution: GameEvents.addToBoard,

@@ -1,5 +1,5 @@
 import { Map, Range } from 'immutable';
-import {gameStates, playerStates, sorts, teamStates, sorts} from '../../src/constants';
+import {gameStates, playerStates, sorts, teamStates} from '../../src/constants';
 
 const generateRandomCards = numberOfCards => {
     return Range(0, numberOfCards).map(() => (
@@ -170,7 +170,8 @@ export const gameInProgressDraw = new Map({
     discardPile: {
         cards: generateRandomCards(Math.floor(Math.random() * 15))
     },
-    history: []
+    history: [],
+    undo: []
 });
 
 export const gameInProgressPlay = new Map({
@@ -206,7 +207,6 @@ export const gameInProgressPlay = new Map({
     gameState: gameStates.IN_PROGRESS,
     teams: Range(0, 2).map(teamIndex=>(
         {
-            score: (teamIndex + 2) * 100,
             melds: [ ]
         })).toArray(),
     roundId: 1,
@@ -219,7 +219,8 @@ export const gameInProgressPlay = new Map({
     discardPile: {
         cards: generateRandomCards(Math.floor(Math.random() * 15))
     },
-    history: []
+    history: [],
+    undo: []
 });
 
 export const gameStarted = new Map({
@@ -270,5 +271,6 @@ export const gameStarted = new Map({
     discardPile: {
         cards: []
     },
-    history: []
+    history: [],
+    undo: []
 });

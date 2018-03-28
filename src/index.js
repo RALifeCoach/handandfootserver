@@ -17,6 +17,7 @@ import Socket     from './utils/socket';
 const app = express();
 const port = process.env.PORT || 8091;
 mongoose.connect(config.database.replace('{password}', process.env.PASSWORD));
+Socket.openSocket(process.env.SOCKET_PORT || 8092);
 
 global.app = {superSecret: process.env.SECRET || 'RonnaSmithrim'};
 

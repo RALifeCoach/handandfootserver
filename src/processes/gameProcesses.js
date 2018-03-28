@@ -1,14 +1,24 @@
 import GameModel from '../models/game';
 import GameRules from '../events/gameRules';
-import { directions, undoOptions, playerStates, gameStates } from './../constants';
-import {playerIndexToTeamIndex, teamStates} from "../constants";
+import { directions, playerStates, gameStates } from './../constants';
+import {playerIndexToTeamIndex, sorts, teamStates} from "../constants";
+import UserProcesses from "./userProcesses";
 
 class GameProcesses {
     constructor() {
         this.game = null;
     }
 
-    async updateGame(gameName, playerIndex, actionType, updateData) {
+    async updateGame(message) {
+        const gameName = message.gameName;
+        const direction = directions.find(direction=>direction.direction === message.direction);
+        if (!direction) {
+            throw new Error('player not found at direction ' + message.direction);
+        }
+        const playerIndex = direction.playerIndex;
+        const actionType = message.type;
+        const updateData = message.updateData;
+
         try {
             this.game = await this.fetchGame(gameName);
         } catch (err) {
@@ -20,13 +30,10 @@ class GameProcesses {
         }
 
         const player = this.game.players[playerIndex];
-        if (!player) {
-            throw new Error('player not found at index ' + playerIndex);
-        }
         const team = this.game.teams[playerIndexToTeamIndex[playerIndex]];
 
         const { stateErr, action } = GameRules.validateStatesAndActions(this.game.gameState, player.playerState,
-            actionType, updateData);
+            actionType);
         if (stateErr) {
             throw new Error(stateErr);
         }
@@ -35,11 +42,19 @@ class GameProcesses {
             throw new Error(actionErr);
         }
 
+        const broadcastGame = Object.assign({}, this.game);
+        this.game.messages = [];
+
         try {
             this.game = await this.game.save();
         } catch (err) {
             throw err;
         }
+
+        UserProcesses.broadcastToAllUsers({
+            success: true,
+            game: broadcastGame
+        });
     }
 
     async fetchGame(gameName) {
@@ -61,16 +76,15 @@ class GameProcesses {
                 { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] },
                 { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] }
             ],
-            players: [
-                { "connected": false, "hands": [{"cards": [], "sort": "none"},
-                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
-                { "connected": false, "hands": [{"cards": [], "sort": "none"},
-                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
-                { "connected": false, "hands": [{"cards": [], "sort": "none"},
-                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED },
-                { "connected": false, "hands": [{"cards": [], "sort": "none"},
-                        {"cards": [], "sort": "none"}], "inHand": true, playerState: playerStates.NOT_JOINED }
-            ],
+            players: [1, 2, 3, 4].map(()=>(
+                {
+                    connected: false,
+                    hands: [{cards: [], sort: sorts.NONE}, {cards: [], sort: sorts.NONE}],
+                    inHand: true,
+                    cardsToDraw: 0,
+                    playerState: playerStates.NOT_JOINED
+                }
+            )),
             roundId: 0,
             gameState: gameStates.NOT_STARTED,
             currentPlayerIndex: -1,

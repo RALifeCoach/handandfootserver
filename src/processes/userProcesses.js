@@ -1,5 +1,6 @@
 import UserModel from '../models/user';
 import GameModel from '../models/game';
+import GameUtils from '../events/gameUtils';
 import {comparePassword, cryptPassword} from '../utils/passwords';
 import jwt from 'jsonwebtoken';
 
@@ -98,49 +99,23 @@ class UserProcesses {
         return this.users[token];
     }
 
+    getUserFromSocket(socket) {
+        return new Map(this.users).find(user=>user.socket === socket);
+    }
+
+    disconnectPlayer(user) {
+        return null;
+    }
+
     broadcastToAllUsers(message) {
-        const originalGame = this.stripDownGame(message);
+        GameUtils.stripDownGame(message);
         Object.keys(this.users).forEach((token, userIndex) => {
             const user = this.users[token];
-            this.setPlayerHands(message.game, originalGame, userIndex);
+            GameUtils.setPlayerHands(message.game, userIndex);
             if (user.socket) {
                 user.socket.send(JSON.stringify(message));
             }
         });
-    }
-
-    stripDownGame(message) {
-        if (!message.game) {
-            return null;
-        }
-        const originalGame = message.game;
-        const game = JSON.parse(JSON.stringify(message.game));
-        game.pileCounts = game.piles.map(pile=>pile.cards.length);
-        delete game.piles;
-        game.discardPileCount = game.discardPile.cards.length;
-        game.discardPileTopCard = game.discardPile.cards[game.discardPile.cards.length - 1];
-        delete game.discardPile;
-        game.players.forEach(player=> {
-            player.handCounts = player.hands.map(hand=>hand.cards.length);
-            delete player.hands;
-        });
-        game.undoCount = game.undo.length;
-        message.game = game;
-        return originalGame;
-    }
-
-    setPlayerHands(game, originalGame, userIndex) {
-        if (!originalGame) {
-            return;
-        }
-        game.players.forEach(player=> {
-            if (player.hand) {
-                delete player.hand;
-            }
-        });
-        game.players[userIndex].hand = game.players[userIndex].inHand
-            ? originalGame.players[userIndex].hands[0]
-            : originalGame.players[userIndex].hands[1];
     }
 }
 

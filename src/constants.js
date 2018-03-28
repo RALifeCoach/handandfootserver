@@ -61,6 +61,8 @@ export const playerStates = {
     UP7_PENDING: 'up 7 pending',
     DISCARD_PENDING: 'discard pending',
     WAIT: 'wait',
+    RESIGN_REQUEST: 'resign request',
+    END_REQUEST: 'end request',
     ANY: ''
 };
 
