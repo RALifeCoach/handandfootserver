@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hand And Foot</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script>
+        window.config = {
+            path: 'ws://localhost:8092/',
+            authenticationPath: 'http://localhost:8091/api/authenticate',
+            requestList: 'http://localhost:8091/game/games'
+        }
+    </script>
+</head>
+<body>
+<div id="react-base"></div>
+<script src="/dist/main.js"></script>
+</body>
+</html>

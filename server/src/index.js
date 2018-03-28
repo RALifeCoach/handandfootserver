@@ -21,6 +21,7 @@ Socket.openSocket(process.env.SOCKET_PORT || 8092);
 
 global.app = {superSecret: process.env.SECRET || 'RonnaSmithrim'};
 
+app.use(express.static('public'))
 // use body parser so we can get info from POST and/or URL parameters
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

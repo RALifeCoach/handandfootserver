@@ -312,12 +312,6 @@ describe('GameActions', ()=> {
             };
         });
 
-        /*
-        const selectedCards = updateData.cards.sort((cardA, cardB) => cardA.value - cardB.value);
-        GameUtils.createMeld(selectedCards, team);
-
-        GameUtils.removeCardsFromHand(player, selectedCards);
-         */
         test("Create meld with selected cards", ()=>{
             GameActions.addToBoard('game', player, team, updateData);
 
@@ -326,7 +320,7 @@ describe('GameActions', ()=> {
                     {"_id": "cid1", "isRedThree": false, "isWild": false, "suit": "Club", "value": 3},
                     {"_id": "cid3", "isRedThree": false, "isWild": false, "suit": "Club", "value": 4}
                 ],
-                "isComplete": true,
+                "isComplete": false,
                 "isDirty": false,
                 "suit": "Club",
                 "type": "run"
@@ -336,6 +330,81 @@ describe('GameActions', ()=> {
                     _id: 'cid2'
                 }
             ]);
+        });
+    });
+
+    describe("discard", ()=>{
+        test("Copy card to discard and set state", ()=>{
+            const player = {};
+            const updateData = {
+                cards: ['dis-card']
+            };
+
+            GameActions.discard('game', player, 'team', updateData);
+
+            expect(player).toEqual({
+                discard: 'dis-card',
+                playerState: playerStates.DISCARD_PENDING
+            });
+        });
+    });
+
+    describe("resignRequest", ()=>{
+        test("Set states", ()=>{
+            const game = {
+                currentPlayerIndex: 3,
+                players: [ {}, {}, {}, {} ]
+            };
+
+            GameActions.resignRequest(game, 'player', 'team', 'updateData');
+
+            expect(game).toEqual({
+                gameState: gameStates.PENDING_RESIGN,
+                currentPlayerIndex: 3,
+                players: [ {}, {playerState: playerStates.RESIGN_REQUEST}, {}, {} ]
+            });
+        });
+    });
+
+    describe("undo", ()=>{
+        test("Update game with uno", ()=>{
+            const game = {
+                currentPlayerIndex: 3,
+                undo: [
+                    {
+                        currentPlayerIndex: 1,
+                        undo: []
+                    },
+                    {
+                        currentPlayerIndex: 2,
+                        undo: [
+                            {
+                                currentPlayerIndex: 1,
+                                undo: []
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            GameActions.undo(game, 'player', 'team', 'updateData');
+
+            expect(game).toEqual({
+                currentPlayerIndex: 2,
+                undo: [
+                    {
+                        currentPlayerIndex: 1,
+                        undo: []
+                    }
+                ]
+            });
+
+            GameActions.undo(game, 'player', 'team', 'updateData');
+
+            expect(game).toEqual({
+                currentPlayerIndex: 1,
+                undo: []
+            });
         });
     });
 });
