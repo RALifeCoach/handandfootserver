@@ -1,15 +1,16 @@
 import UserModel from '../models/user';
-import GameModel from '../models/game';
+import GameProcesses from '../processes/gameProcesses';
 import GameUtils from '../events/gameUtils';
 import {comparePassword, cryptPassword} from '../utils/passwords';
 import jwt from 'jsonwebtoken';
+import {Map} from 'immutable';
 
 class UserProcesses {
     constructor() {
         this.users = {};
     }
 
-    static async setup() {
+    async setup() {
         const chris = new UserModel({
             name: 'Chris',
             password: cryptPassword('chris@gmail.com'),
@@ -57,13 +58,13 @@ class UserProcesses {
             throw err;
         }
         try {
-            await GameModel.clearGames();
+            await GameProcesses.clearGames();
         } catch (err) {
             throw err;
         }
     }
 
-    async authenticate(userId, password, superSecret) {
+    async authenticate(userId, password) {
         let user;
         try {
             user = await UserModel.findOne({
@@ -85,11 +86,12 @@ class UserProcesses {
             name: user.name,
             id: user._id
         };
-        const token = jwt.sign(payload, superSecret, {
+        const token = jwt.sign(payload, global.app.superSecret, {
             expiresIn: 1440 // expires in 24 hours
         });
         this.users[token] = {
-            user
+            user,
+            socket: null
         };
 
         return token;

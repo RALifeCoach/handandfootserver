@@ -6,8 +6,9 @@ import { Provider } from 'react-redux'
 import createHistory from 'history/createBrowserHistory'
 import { Route } from 'react-router'
 import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux'
-import Login from './login-component';
-import Games from './games-component';
+import LoginComponent from './login-component';
+import GamesComponent from './games-component';
+import ErrorComponent from './error-component';
 
 import reducers from '../reducers';
 import Socket from '../utils/socket';
@@ -24,6 +25,7 @@ const store = createStore(
     }),
     applyMiddleware(middleware,
         LoginMiddleware.login,
+        LoginMiddleware.ioError,
         GamesMiddleware.games)
 );
 const socket = new Socket(store);
@@ -32,8 +34,9 @@ ReactDOM.render(
     <Provider store={store}>
         <ConnectedRouter history={history}>
             <div>
-                <Route exact path="/" component={Login}/>
-                <Route exact path="/games" component={Games}/>
+                <Route exact path="/index.html" component={LoginComponent}/>
+                <Route exact path="/games" component={GamesComponent}/>
+                <Route exact path="/error" component={ErrorComponent}/>
             </div>
         </ConnectedRouter>
     </Provider>,

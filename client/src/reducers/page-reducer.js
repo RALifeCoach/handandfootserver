@@ -1,7 +1,7 @@
 import {
     LOGIN_SUCCESSFUL,
     LOGOUT
-} from '../actions/login-actions';
+} from '../actions/user-actions';
 
 export default function PageReducer(state = {pageState: 'login'}, action) {
     console.log(state);

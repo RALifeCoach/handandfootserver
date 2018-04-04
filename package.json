@@ -5,9 +5,9 @@
   "repository": "https://github.com/RALifeCoach/handandfootserver.git",
   "main": "dist/main.js",
   "scripts": {
-    "build": "webpack",
+    "build-server": "webpack --config ./server/webpack.config.js --progress --mode development",
+    "build-client": "webpack --config ./client/webpack.config.js --progress --mode development",
     "start": "nodemon dist/main.js",
-    "postinstall": "webpack -p --config ./webpack.production.config.js --progress",
     "test": "jest --forceExit"
   },
   "jest": {
@@ -20,6 +20,14 @@
   "author": "Christopher Oliphant",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.18.0",
+    "react": "^16.2.0",
+    "react-bootstrap": "^0.32.1",
+    "react-dom": "^16.2.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^5.0.0-alpha.9",
+    "redux": "^3.7.2",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
@@ -37,6 +45,9 @@
     "babel-jest": "^23.0.0-alpha.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "compression-webpack-plugin": "^1.1.11",
+    "file-loader": "^1.1.11",
     "jest": "^22.4.2",
     "mock-socket": "^7.1.0",
     "nodemon": "^1.17.1",

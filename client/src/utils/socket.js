@@ -1,26 +1,36 @@
 //import WebSocket from 'ws';
 import {
     loginSuccessful
-} from '../actions/login-actions';
+} from '../actions/user-actions';
 import {
     LOGIN_SUCCESSFUL,
+    REQUEST_TOKEN,
     NEW_USER
 } from '../messages/login-messages';
+import {
+    GAMES_LIST
+} from '../messages/game-messages';
+import {
+    REQUEST_LIST,
+    refreshList
+} from '../actions/games-actions';
+import CommonUtils from './../utils/commonUtils';
 
 let socketInstance = null;
 export default class Socket {
     constructor(store) {
         if (!socketInstance) {
             console.log(global.config);
-            const ws = new WebSocket(global.config.path);
-            ws.onopen = function() {
+            this.ws = new WebSocket(global.config.path);
+            this.ws.onopen = function() {
                 console.log('open')
             };
 
-            ws.onmessage = function(ev) {
-                let _data = ev.data;
+            this.ws.onmessage = (ev) => {
+                let data = JSON.parse(ev.data);
 
-                console.log(_data);
+                console.log(data);
+                this.handleMessage(data);
             };
             this.store = store;
             socketInstance = this;
@@ -30,11 +40,18 @@ export default class Socket {
 
     handleMessage(message) {
         switch (message.type) {
-            case LOGIN_SUCCESSFUL:
-                this.store.dispatch(loginSuccessful());
+            case GAMES_LIST:
+                this.store.dispatch(refreshList(CommonUtils.formatGames(message.games)));
                 break;
             case NEW_USER:
                 break;
         }
+    }
+
+    sendToken(token) {
+        this.ws.send(JSON.stringify({
+            type: 'send token',
+            token: token
+        }));
     }
 }

@@ -6,17 +6,19 @@ import { directions } from '../constants';
 export default class GameController {
     static games(req, res){
         GameModel.find({}).populate('players.user').exec((err, games) => {
-            res.json(games);
+            res.json({ success: true, games });
         });
     }
 
     static createNewGame(req, res){
         const gameName = req.query.gameName;
         GameProcesses.createNewGame(gameName)
-            .then(()=>{
+            .then(doc => {
                 res.json({ success: true });
+                GameProcesses.broadcastGames();
             })
-            .catch(err=>{
+            .catch(err => {
+                console.log(err.stack);
                 res.json({ success: false, message: err.message })
             });
     }

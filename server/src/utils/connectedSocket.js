@@ -1,33 +1,36 @@
 import UserProcesses from './../processes/userProcesses';
 import GameProcesses from './../processes/gameProcesses';
+import {refreshList} from "../../../client/src/actions/games-actions";
 
 export default class ConnectedSocket {
-    constructor (socket, guid, onClose) {
+    constructor (socket, guid, onClose, store) {
         this.socket = socket;
         this.guid = guid;
         this.userDataPresent = false;
         this.onClose = onClose;
         this.timer = null;
+        this.store = store;
         this.handleSocketMessages();
     }
 
     handleSocketMessages() {
-        this.socket.send(JSON.stringify({
-            type: 'request token'
-        }));
-        this.socket.on('close', ()=>this.onSocketClose(socket));
-        this.socket.on('message', request=>this.onMessage(JSON.parse(request)));
+        this.socket.on('close', ()=>this.onSocketClose());
+        this.socket.on('message', request=>this.onMessage(request));
     }
 
     onSocketClose() {
         const userData = UserProcesses.getUserFromSocket(this.socket);
-        userData.socket = null;
-        UserProcesses.disconnectPlayer(userData.user);
+        if (userData) {
+            userData.socket = null;
+            UserProcesses.disconnectPlayer(userData.user);
+        }
         this.userDataPresent = false;
         this.onClose(this.guid);
     }
 
-    onMessage(message) {
+    onMessage(request) {
+        const message = JSON.parse(request);
+        console.log('socket', message);
         if (!this.userDataPresent) {
             if (message.type !== 'send token') {
                 this.socket.send(JSON.stringify({type: 'error', message: 'error token not sent'}));
@@ -50,6 +53,7 @@ export default class ConnectedSocket {
                 success: false,
                 message: err.message
             })));
+
         clearTimeout(this.timer);
         this.timer = setTimeout(()=>this.onSocketClose(), 3600000);
     }

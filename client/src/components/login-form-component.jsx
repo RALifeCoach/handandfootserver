@@ -2,7 +2,7 @@ import React from 'react';
 import validator from 'validator';
 import { FormGroup, ControlLabel, FormControl, HelpBlock, Button, Alert } from 'react-bootstrap';
 import { connect } from 'react-redux'
-import { login } from '../actions/login-actions';
+import { login } from '../actions/user-actions';
 
 class LoginFormComponent extends React.Component {
     constructor(props, context) {
@@ -44,8 +44,6 @@ class LoginFormComponent extends React.Component {
     }
 
     render() {
-        console.log('render');
-        console.log(this.props);
         return (
             <form>
                 <FormGroup
@@ -96,10 +94,8 @@ class LoginFormComponent extends React.Component {
 }
 
 const mapStateToProps = state => {
-    console.log('here');
-    console.log(state.reducers.login);
     return {
-        loginState: state.reducers.login.loginState
+        loginState: state.reducers.user.loginState
     }
 };
 

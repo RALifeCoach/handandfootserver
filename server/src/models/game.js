@@ -5,7 +5,7 @@ import MeldSchema from './meld';
 import HistorySchema from './history';
 import CardSchema from './card';
 
-const GameSchema = new Schema({
+export default mongoose.model('Game', new Schema({
     name: {
         type: String,
         required: true,
@@ -53,6 +53,4 @@ const GameSchema = new Schema({
     history: [ HistorySchema ],
     undo: [],
     messages: []
-});
-
-export default mongoose.model('Game', GameSchema, 'Game');
+}));

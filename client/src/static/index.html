@@ -8,12 +8,13 @@
         window.config = {
             path: 'ws://localhost:8092/',
             authenticationPath: 'http://localhost:8091/api/authenticate',
-            requestList: 'http://localhost:8091/game/games'
+            requestList: 'http://localhost:8091/api/game/games',
+            addGame: 'http://localhost:8091/api/game/createGame?gameName=${gameName}&password=${password}'
         }
     </script>
 </head>
 <body>
 <div id="react-base"></div>
-<script src="/dist/main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

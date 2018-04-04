@@ -9,7 +9,7 @@ export default class GameController {
     }
 
     static authenticate(req, res){
-        userProcesses.authenticate(req.body.userId, req.body.password, global.app.superSecret)
+        userProcesses.authenticate(req.body.userId, req.body.password)
             .then(token=>{
                 res.json({
                     success: true,

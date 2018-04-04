@@ -8,7 +8,7 @@ export default mongoose.model('User', new Schema({
     name: String,
     password: {
         salt: String,
-        token: String
+        passwordHash: String
     },
     email: {
         type: String,

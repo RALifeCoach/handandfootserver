@@ -1,15 +1,12 @@
-const path = require('path');
-const webpack = require('webpack');
-
 module.exports = {
     devtool: 'source-map',
 
-    entry: [
-        './src/index'
-    ],
+    entry:  {
+        app : __dirname + "/src/index.js",
+    },
 
     output: {
-        path: path.join(__dirname, 'dist'),
+        path: __dirname + '/../public',
         filename: 'main.js'
     },
 
@@ -25,9 +22,27 @@ module.exports = {
                         presets: ['env', 'react']
                     }
                 }
+            },
+            {
+                test: /\.(html|js)$/,
+                include: /src\/static/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]'
+                        }
+                    }
+                ]
             }
         ]
     },
+    /*
+loaders: [
+            { test: /\.(html)$/,
+              loader: "file?name=[path][name].[ext]&context=./app/static"
+            }
+        ]     */
     resolve: {
         extensions: ['.js', '.jsx'],
     }

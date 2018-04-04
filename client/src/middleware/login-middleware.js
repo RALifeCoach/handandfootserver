@@ -2,11 +2,14 @@ import {
     LOGIN,
     LOGIN_SUCCESSFUL,
     LOGOUT,
+    ERROR,
     loginSuccessful,
-    loginFailed
-} from '../actions/login-actions';
+    loginFailed,
+    ioError
+} from '../actions/user-actions';
 import { requestList } from '../actions/games-actions';
 import { push } from 'react-router-redux';
+import Socket from './../utils/socket';
 import RestCalls from './../utils/rest-calls';
 
 export default class LoginMiddleware {
@@ -18,8 +21,11 @@ export default class LoginMiddleware {
                         LoginMiddleware.sendLoginData(action, dispatch);
                         break;
                     case LOGIN_SUCCESSFUL:
-                        dispatch(requestList());
-                        dispatch(push('games'));
+                        new Socket().sendToken(action.token);
+                        setTimeout(()=>{
+                            dispatch(requestList());
+                            dispatch(push('games'));
+                        }, 200);
                         break;
                     default:
                         break;
@@ -29,7 +35,6 @@ export default class LoginMiddleware {
     }
 
     static sendLoginData(action, dispatch) {
-        console.log(action);
         RestCalls.sendLoginData(action.userId, action.password)
             .then(response=>{
                 if (response.status !== 200) {
@@ -40,5 +45,21 @@ export default class LoginMiddleware {
                         : dispatch(loginFailed());
                 }
             });
+    }
+
+    static ioError({dispatch, getState}) {
+        return next =>
+            action => {
+                switch (action.type) {
+                    case ERROR:
+                        setTimeout(()=>{
+                            dispatch(push('error'));
+                        }, 200);
+                        break;
+                    default:
+                        break;
+                }
+                return next(action);
+            }
     }
 }

@@ -13,4 +13,11 @@ export default class RestCalls {
             headers: {'X-Access-Token': token}
         });
     }
+
+    static sendAddGame(token, gameName, password) {
+        const url = eval('`' + global.config.addGame + '`');
+        return axios.get(url, {
+            headers: {'X-Access-Token': token}
+        });
+    }
 }

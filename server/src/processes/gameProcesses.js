@@ -3,6 +3,7 @@ import GameRules from '../events/gameRules';
 import { directions, playerStates, gameStates } from './../constants';
 import {playerIndexToTeamIndex, sorts, teamStates} from "../constants";
 import UserProcesses from "./userProcesses";
+import {cryptPassword} from "../utils/passwords";
 
 class GameProcesses {
     constructor() {
@@ -68,10 +69,10 @@ class GameProcesses {
         }
     }
 
-    createNewGame(gameName, password) {
-        const game = GameModel.create({
+    async createNewGame(gameName, password) {
+        const game = new GameModel({
             name: gameName,
-            password,
+            password: password ? cryptPassword(password) : null,
             teams: [
                 { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] },
                 { score: 0, teamState: teamStates.NOT_ON_TABLE, melds: [] }
@@ -96,15 +97,20 @@ class GameProcesses {
             messages: [],
         });
 
-        return new Promise((resolve, reject)=>{
-            game.save()
-                .then(doc => {
-                    this.game = doc;
-                    resolve();
-                })
-                .catch(err => {
-                    reject(err);
-                });
+        this.game = await game.save();
+    }
+
+    broadcastGames() {
+        GameModel.find({}).populate('players.user').exec((err, games) => {
+            if (err) {
+                console.log(err.stack);
+                return;
+            }
+            const message = {
+                type: 'games list',
+                games
+            };
+            UserProcesses.broadcastToAllUsers(message);
         });
     }
 
@@ -115,6 +121,10 @@ class GameProcesses {
                 user: playerData.user
             })
         );
+    }
+
+    async clearGames(updateData) {
+        await GameModel.remove({});
     }
 }
 

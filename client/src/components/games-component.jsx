@@ -1,8 +1,13 @@
 import React from 'react';
-import { Grid, Row, Col } from 'react-bootstrap';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import AddGameComponent from './add-game-component';
 import { connect } from "react-redux";
 import { push } from 'react-router-redux';
-import { joinGame } from "../actions/games-actions";
+import {
+    requestList,
+    addGameClick,
+    joinGame
+} from "../actions/games-actions";
 
 const GamesComponent = props => {
     if (props.gamesState === 'login') {
@@ -15,29 +20,47 @@ const GamesComponent = props => {
                 <Col xs={9} md={6}>
                     Game List
                 </Col>
+                {props.gamesState === 'success' &&
+                    <Col xs={3} md={6}>
+                        <Button bsStyle="primary"
+                                onClick={() => props.addGameClick()}>
+                            Add Game
+                        </Button>
+                    </Col>
+                }
             </Row>
-            {props.gamesState !== 'waiting' &&
-                props.games.map(game => (
-                    <div>
+            {props.gamesState === 'success' &&
+                <div>
+                    {props.games.length === 0 &&
                         <Row className="show-grid">
                             <Col xs={9} md={6}>
-                                {game.name}
+                                No games to display
                             </Col>
                         </Row>
-                        <Row className="show-grid">
-                            {game.players.map(player => (
-                                <Col xs={3} md={1}>
-                                    <div onClick={player.name
-                                        ? null
-                                        : props.joinGame(game.name, null, player.direction)}>
-                                        {player.direction}: {player.name || 'Open'}
-                                    </div>
+                    }
+                    {props.games.map((game, gameIndex) => (
+                        <div key={gameIndex}>
+                            <Row className="show-grid">
+                                <Col xs={9} md={6}>
+                                    {game.name}
                                 </Col>
-                            ))}
-                        </Row>
-                    </div>
-                ))
+                            </Row>
+                            <Row className="show-grid">
+                                {game.players.map((player, playerIndex) => (
+                                    <Col xs={3} md={1} key={playerIndex}>
+                                        <div onClick={player.name
+                                            ? null
+                                            : ()=>props.joinGame(game.name, null, player.direction)}>
+                                            {player.direction}: {player.name || 'Open'}
+                                        </div>
+                                    </Col>
+                                ))}
+                            </Row>
+                        </div>
+                    ))}
+                </div>
             }
+            <AddGameComponent/>
         </Grid>
     );
 };
@@ -52,6 +75,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
         gotoLogin: () => dispatch(push('/')),
         requestList: () => dispatch(requestList()),
+        addGameClick: () => dispatch(addGameClick()),
         joinGame: (gameName, password, direction) => dispatch(joinGame(gameName, password, direction))
     }
 );
