@@ -4,7 +4,7 @@ import {
 } from '../actions/user-actions';
 
 export default function PageReducer(state = {pageState: 'login'}, action) {
-    console.log(state);
+    console.log('page reducer: ' + JSON.stringify(state));
     switch (action.type) {
         case LOGIN_SUCCESSFUL:
             return Object.assign({}, state, {

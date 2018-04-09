@@ -1,26 +1,25 @@
-//import WebSocket from 'ws';
 import {
-    loginSuccessful
-} from '../actions/user-actions';
+    GAMES_LIST,
+    JOIN_GAME
+} from '../messages/games-messages';
 import {
-    LOGIN_SUCCESSFUL,
-    REQUEST_TOKEN,
-    NEW_USER
-} from '../messages/login-messages';
-import {
-    GAMES_LIST
+    UPDATE_GAME
 } from '../messages/game-messages';
 import {
-    REQUEST_LIST,
     refreshList
 } from '../actions/games-actions';
+import {
+    updateGame
+} from '../actions/game-actions';
+import {
+    ioError
+} from '../actions/user-actions';
 import CommonUtils from './../utils/commonUtils';
 
 let socketInstance = null;
 export default class Socket {
     constructor(store) {
         if (!socketInstance) {
-            console.log(global.config);
             this.ws = new WebSocket(global.config.path);
             this.ws.onopen = function() {
                 console.log('open')
@@ -29,7 +28,6 @@ export default class Socket {
             this.ws.onmessage = (ev) => {
                 let data = JSON.parse(ev.data);
 
-                console.log(data);
                 this.handleMessage(data);
             };
             this.store = store;
@@ -38,12 +36,24 @@ export default class Socket {
         return socketInstance;
     }
 
+    static getInstance() {
+        return socketInstance;
+    }
+
     handleMessage(message) {
+        console.log('socket message: ' + JSON.stringify(message));
+        if (message.success === false) {
+            this.store.dispatch(ioError(message.message));
+            return;
+        }
         switch (message.type) {
             case GAMES_LIST:
                 this.store.dispatch(refreshList(CommonUtils.formatGames(message.games)));
                 break;
-            case NEW_USER:
+            case UPDATE_GAME:
+                this.store.dispatch(updateGame(message.game));
+                break;
+            default:
                 break;
         }
     }
@@ -52,6 +62,15 @@ export default class Socket {
         this.ws.send(JSON.stringify({
             type: 'send token',
             token: token
+        }));
+    }
+
+    sendJoinGame(gameName, password, direction) {
+        this.ws.send(JSON.stringify({
+            type: JOIN_GAME,
+            gameName,
+            password,
+            direction
         }));
     }
 }

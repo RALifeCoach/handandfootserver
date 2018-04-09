@@ -8,7 +8,8 @@ export default class CommonUtils {
                     {teamIndex: 0, playerIndex: 1, direction: 'South'},
                     {teamIndex: 1, playerIndex: 1, direction: 'West'}]
                     .map(playerData=>({
-                        name: game.players[playerData.playerIndex].name,
+                        name: game.players[playerData.playerIndex].user
+                            && game.players[playerData.playerIndex].user.name,
                         direction: playerData.direction
                     }))
             }

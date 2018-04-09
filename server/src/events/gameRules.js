@@ -155,7 +155,7 @@ class GameRules {
         return { action };
     }
 
-    performValidationAndAction(action, game, player, team, updateData) {
+    performValidationAndAction(action, game, player, team, updateData, userData) {
         if (action.validation) {
             const err = action.validation(game, player, team, updateData);
             if (err) {
@@ -165,7 +165,7 @@ class GameRules {
         if (action.undo === undoOptions.SAVE) {
             game.undo.push(JSON.parse(JSON.stringify(game)));
         }
-        action.execution(game, player, team, updateData);
+        action.execution(game, player, team, updateData, userData);
         if (action.undo === undoOptions.CLEAR) {
             game.undo = [];
         }

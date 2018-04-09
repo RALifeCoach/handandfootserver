@@ -62,7 +62,7 @@ class AddGameComponent extends React.Component {
                 <Modal.Body>
                     <form>
                         <FormGroup
-                            controlId="formAddGame"
+                            controlId="formAddGameName"
                             validationState={this.getGameNameValidation()}
                         >
                             <ControlLabel>Game Name:</ControlLabel>
@@ -77,7 +77,7 @@ class AddGameComponent extends React.Component {
                             <HelpBlock>Must be unique.</HelpBlock>
                         </FormGroup>
                         <FormGroup
-                            controlId="formPassword"
+                            controlId="formAddGamePassword"
                         >
                             <ControlLabel>Password:</ControlLabel>
                             <FormControl

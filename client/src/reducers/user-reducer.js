@@ -6,6 +6,7 @@ import {
 } from '../actions/user-actions';
 
 export default function UserReducer(state = {loginState: 'logged out'}, action) {
+    console.log('user reducer: ' + JSON.stringify(state));
     switch (action.type) {
         case LOGIN_SUCCESSFUL:
             return Object.assign({}, state, {

@@ -5,10 +5,11 @@ export const ADD_GAME_CLICK = 'add game click';
 export const ADD_GAME_CANCEL = 'add game cancel';
 export const ADD_GAME_REQUEST = 'add game request';
 
-export function joinGame(gameName, direction) {
+export function joinGame(gameName, password, direction) {
     return {
         type: JOIN_GAME,
         gameName,
+        password,
         direction
     }
 }

@@ -8,6 +8,7 @@ import { Route } from 'react-router'
 import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux'
 import LoginComponent from './login-component';
 import GamesComponent from './games-component';
+import GameComponent from './game-component';
 import ErrorComponent from './error-component';
 
 import reducers from '../reducers';
@@ -36,6 +37,7 @@ ReactDOM.render(
             <div>
                 <Route exact path="/index.html" component={LoginComponent}/>
                 <Route exact path="/games" component={GamesComponent}/>
+                <Route exact path="/game" component={GameComponent}/>
                 <Route exact path="/error" component={ErrorComponent}/>
             </div>
         </ConnectedRouter>

@@ -6,7 +6,7 @@ import { directions } from '../constants';
 export default class GameController {
     static games(req, res){
         GameModel.find({}).populate('players.user').exec((err, games) => {
-            res.json({ success: true, games });
+            res.json({ success: true, games: games.map(game=>game.toObject()) });
         });
     }
 

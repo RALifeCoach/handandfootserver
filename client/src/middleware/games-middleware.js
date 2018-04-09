@@ -7,7 +7,9 @@ import {
 import {
     ioError
 } from '../actions/user-actions';
+import { push } from 'react-router-redux';
 import RestCalls from './../utils/rest-calls';
+import Socket from './../utils/socket';
 import CommonUtils from './../utils/commonUtils';
 
 export default class GamesMiddleware {
@@ -20,6 +22,11 @@ export default class GamesMiddleware {
                         break;
                     case ADD_GAME_REQUEST:
                         GamesMiddleware.sendAddGame(getState, dispatch, action.gameName, action.password);
+                        break;
+                    case JOIN_GAME:
+                        GamesMiddleware.sendJoinGame(getState, dispatch, action.gameName,
+                            action.password, action.direction);
+                        dispatch(push('game'));
                         break;
                     default:
                         break;
@@ -56,5 +63,9 @@ export default class GamesMiddleware {
                     }
                 }
             });
+    }
+
+    static sendJoinGame(getState, dispatch, gameName, password, direction) {
+        Socket.getInstance().sendJoinGame(gameName, password, direction);
     }
 }

@@ -1,4 +1,5 @@
 import { Range } from 'immutable';
+import _ from 'lodash';
 import {gameStates, meldTypes, playerStates, suits, teamStates} from '../constants';
 import GameValidations from "./gameValidations";
 
@@ -167,9 +168,8 @@ export default class GameUtils {
             return;
         }
         this.originalGame = message.game;
-        const game = JSON.parse(JSON.stringify(message.game));
-        game.pileCounts = game.piles.map(pile=>pile.cards.length);
-        delete game.piles;
+        const game = _.cloneDeep(message.game);
+        game.piles = game.piles.map(pile=>pile.cards.length);
         game.discardPileCount = game.discardPile.cards.length;
         game.discardPileTopCard = game.discardPile.cards[game.discardPile.cards.length - 1];
         delete game.discardPile;

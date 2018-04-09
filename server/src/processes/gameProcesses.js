@@ -4,6 +4,7 @@ import { directions, playerStates, gameStates } from './../constants';
 import {playerIndexToTeamIndex, sorts, teamStates} from "../constants";
 import UserProcesses from "./userProcesses";
 import {cryptPassword} from "../utils/passwords";
+import _ from 'lodash';
 
 class GameProcesses {
     constructor() {
@@ -43,7 +44,7 @@ class GameProcesses {
             throw new Error(actionErr);
         }
 
-        const broadcastGame = Object.assign({}, this.game);
+        const broadcastGame = _.cloneDeep(this.game.toObject());
         this.game.messages = [];
 
         try {
@@ -54,6 +55,7 @@ class GameProcesses {
 
         UserProcesses.broadcastToAllUsers({
             success: true,
+            type: 'update game',
             game: broadcastGame
         });
     }

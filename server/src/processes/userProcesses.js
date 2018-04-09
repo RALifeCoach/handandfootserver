@@ -2,6 +2,7 @@ import UserModel from '../models/user';
 import GameProcesses from '../processes/gameProcesses';
 import GameUtils from '../events/gameUtils';
 import {comparePassword, cryptPassword} from '../utils/passwords';
+import {directions} from '../constants';
 import jwt from 'jsonwebtoken';
 import {Map} from 'immutable';
 
@@ -82,6 +83,15 @@ class UserProcesses {
             throw new Error('Authentication failed.');
         }
 
+        let userData, socket = null;
+        while (userData = Object.keys(this.users).find(
+            token=>this.users[token].user.toObject()._id.toString() === user._id.toString())) {
+            if (this.users[token].socket) {
+                socket = this.users[token].socket;
+            }
+            delete this.users[userData];
+        }
+
         const payload = {
             name: user.name,
             id: user._id
@@ -91,7 +101,9 @@ class UserProcesses {
         });
         this.users[token] = {
             user,
-            socket: null
+            token,
+            socket,
+            direction: null
         };
 
         return token;
@@ -111,9 +123,9 @@ class UserProcesses {
 
     broadcastToAllUsers(message) {
         GameUtils.stripDownGame(message);
-        Object.keys(this.users).forEach((token, userIndex) => {
+        Object.keys(this.users).forEach(token => {
             const user = this.users[token];
-            GameUtils.setPlayerHands(message.game, userIndex);
+            GameUtils.setPlayerHands(message.game, directions.findIndex(direction=>direction.direction === user.direction));
             if (user.socket) {
                 user.socket.send(JSON.stringify(message));
             }

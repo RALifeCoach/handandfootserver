@@ -31,28 +31,39 @@ export default class ConnectedSocket {
     onMessage(request) {
         const message = JSON.parse(request);
         console.log('socket', message);
-        if (!this.userDataPresent) {
+        if (!this.userDataPresent || message.type === 'send token') {
             if (message.type !== 'send token') {
                 this.socket.send(JSON.stringify({type: 'error', message: 'error token not sent'}));
                 return;
             }
-            const userData = UserProcesses.getUserFromToken(message.token);
-            if (!userData) {
+            this.userData = UserProcesses.getUserFromToken(message.token);
+            if (!this.userData) {
                 this.socket.send(JSON.stringify({type: 'error', message: 'error token not found'}));
                 return;
             }
-            userData.socket = this.socket;
+            this.userData.socket = this.socket;
             this.socket.send(JSON.stringify({type: 'acknowledgement', success: true}));
             this.userDataPresent = true;
             this.timer = setTimeout(()=>this.onSocketClose(), 3600000);
             return;
         }
 
+        if (message.type === 'join game') {
+            message.updateData = {
+                user: this.userData.user
+            };
+            this.userData.direction = message.direction;
+        }
+
+        console.log('message: ' + JSON.stringify(message));
         GameProcesses.updateGame(message)
-            .catch(err=>this.socket.send(JSON.stringify({
-                success: false,
-                message: err.message
-            })));
+            .catch(err=>{
+                console.log(err.stack);
+                this.socket.send(JSON.stringify({
+                    success: false,
+                    message: err.message
+                }));
+            });
 
         clearTimeout(this.timer);
         this.timer = setTimeout(()=>this.onSocketClose(), 3600000);

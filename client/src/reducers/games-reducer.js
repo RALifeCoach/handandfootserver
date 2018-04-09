@@ -7,8 +7,8 @@ import {
     ADD_GAME_CANCEL,
 } from '../actions/games-actions';
 
-export default function LoginReducer(state = {gamesState: 'login'}, action) {
-    console.log(state);
+export default function GamesReducer(state = {gamesState: 'login'}, action) {
+    console.log('games reducer: ' + JSON.stringify(state));
     switch (action.type) {
         case REFRESH_LIST:
             return Object.assign({}, state, {
