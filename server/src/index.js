@@ -30,8 +30,8 @@ app.use('/api', apiRoutes);
 app.use('/', express.static('public'));
 
 // Default every route except the above to serve the index.html
-app.get('*', function(req, res) {
-    res.sendFile(path.join(__dirname + 'public/index.html'));
+app.get('*',function (req, res) {
+    res.redirect('/');
 });
 // =======================
 // start the server ======

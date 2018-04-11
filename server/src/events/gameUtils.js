@@ -167,22 +167,28 @@ export default class GameUtils {
             this.originalGame = null;
             return;
         }
-        this.originalGame = message.game;
-        const game = _.cloneDeep(message.game);
-        game.piles = game.piles.map(pile=>pile.cards.length);
-        game.discardPileCount = game.discardPile.cards.length;
-        game.discardPileTopCard = game.discardPile.cards[game.discardPile.cards.length - 1];
-        delete game.discardPile;
-        game.players.forEach(player=> {
-            player.handCount = player.inHand ? player.hands[0].cards.length : player.hands[1].cards.length;
-            delete player.hands;
-        });
-        game.teams.forEach(team=>{
-            team.scoreCurrentHand = GameUtils.scoreTeam(team);
-        });
-        game.undoCount = game.undo.length;
+        this.originalGame = _.cloneDeep(message.game);
+        const game = message.game;
+        game.piles = this.originalGame.piles.map(pile=>pile.cards.length);
+        game.discardPile = {
+            pileCount: this.originalGame.discardPile.cards.length,
+            topCard: this.originalGame.discardPile.cards[this.originalGame.discardPile.cards.length - 1]
+        };
+        game.players = this.originalGame.players
+            .map(player=> Object.assign(player, {
+                handCount: player.inHand ? player.hands[0].cards.length : player.hands[1].cards.length,
+                name: (player.user && player.user.name) || null
+            }))
+            .map(player=>{
+                const {hands, user, ...rest} = player;
+                return rest;
+            });
+        game.teams = this.originalGame.teams.map(team=>
+            Object.assign(team, {
+                scoreCurrentHand: GameUtils.scoreTeam(team)
+            }));
+        game.undoCount = this.originalGame.undo.length;
         delete game.undo;
-        message.game = game;
     }
 
     static setPlayerHands(game, userIndex) {

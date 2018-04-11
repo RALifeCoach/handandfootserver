@@ -1,0 +1,9 @@
+.bg-secondary {
+    color: #fff;
+    background-color: #6c757d;
+}
+
+a.bg-secondary:hover,
+a.bg-secondary:focus {
+    background-color: #6c757d;
+}

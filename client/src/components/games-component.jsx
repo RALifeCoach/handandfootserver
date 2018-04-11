@@ -1,19 +1,14 @@
 import React from 'react';
-import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Grid, Row, Col, Button, Glyphicon } from 'react-bootstrap';
 import AddGameComponent from './add-game-component';
 import { connect } from "react-redux";
-import { push } from 'react-router-redux';
 import {
-    requestList,
     addGameClick,
+    rejoinGame,
     joinGame
 } from "../actions/games-actions";
 
 const GamesComponent = props => {
-    if (props.gamesState === 'login') {
-        props.gotoLogin();
-        return null;
-    }
     return (
         <Grid>
             <Row className="show-grid">
@@ -38,26 +33,35 @@ const GamesComponent = props => {
                             </Col>
                         </Row>
                     }
-                    {props.games.map((game, gameIndex) => (
-                        <div key={gameIndex}>
-                            <Row className="show-grid">
-                                <Col xs={9} md={6}>
-                                    {game.name}
-                                </Col>
-                            </Row>
-                            <Row className="show-grid">
-                                {game.players.map((player, playerIndex) => (
-                                    <Col xs={3} md={1} key={playerIndex}>
-                                        <div onClick={player.name
-                                            ? null
-                                            : ()=>props.joinGame(game.name, null, player.direction)}>
-                                            {player.direction}: {player.name || 'Open'}
-                                        </div>
+                    {props.games.map((game, gameIndex) => {
+                        const playerInGame = Boolean(game.players.find(player=>player.userId === props.userId));
+                        return (
+                            <div key={gameIndex}>
+                                <Row className="show-grid">
+                                    <Col xs={12} md={9}>
+                                        {game.name}
                                     </Col>
-                                ))}
-                            </Row>
-                        </div>
-                    ))}
+                                </Row>
+                                <Row className="show-grid">
+                                    {game.players.map((player, playerIndex) => (
+                                        <Col xs={3} key={playerIndex}>
+                                            {player.direction}: {player.name || 'Open'}
+                                            {!player.name && !playerInGame &&
+                                                <Glyphicon glyph="download"
+                                                           onClick={()=>props.joinGame(game.name, null, player.direction)}
+                                                />
+                                            }
+                                            {player.name && player.userId === props.userId &&
+                                                <Glyphicon glyph="download-alt"
+                                                           onClick={()=>props.rejoinGame(game.name, null, player.direction)}
+                                                />
+                                            }
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </div>
+                        )
+                    })}
                 </div>
             }
             <AddGameComponent/>
@@ -68,15 +72,15 @@ const GamesComponent = props => {
 const mapStateToProps = state => {
     return {
         gamesState: state.reducers.games.gamesState,
-        games: state.reducers.games.games
+        games: state.reducers.games.games,
+        userId: state.reducers.user.userId
     }
 };
 
 const mapDispatchToProps = dispatch => ({
-        gotoLogin: () => dispatch(push('/')),
-        requestList: () => dispatch(requestList()),
         addGameClick: () => dispatch(addGameClick()),
-        joinGame: (gameName, password, direction) => dispatch(joinGame(gameName, password, direction))
+        joinGame: (gameName, password, direction) => dispatch(joinGame(gameName, password, direction)),
+        rejoinGame: (gameName, password, direction) => dispatch(rejoinGame(gameName, password, direction))
     }
 );
 

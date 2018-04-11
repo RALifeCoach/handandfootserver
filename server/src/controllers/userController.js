@@ -10,11 +10,11 @@ export default class GameController {
 
     static authenticate(req, res){
         userProcesses.authenticate(req.body.userId, req.body.password)
-            .then(token=>{
+            .then(loginData=>{
                 res.json({
                     success: true,
-                    message: 'Enjoy your token!',
-                    token: token
+                    token: loginData.token,
+                    userId: loginData.userId
                 });
             })
             .catch(err=>{

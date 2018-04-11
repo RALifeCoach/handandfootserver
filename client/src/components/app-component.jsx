@@ -29,13 +29,13 @@ const store = createStore(
         LoginMiddleware.ioError,
         GamesMiddleware.games)
 );
-const socket = new Socket(store);
+Socket.loadStore(store);
 
 ReactDOM.render(
     <Provider store={store}>
         <ConnectedRouter history={history}>
             <div>
-                <Route exact path="/index.html" component={LoginComponent}/>
+                <Route exact path="/" component={LoginComponent}/>
                 <Route exact path="/games" component={GamesComponent}/>
                 <Route exact path="/game" component={GameComponent}/>
                 <Route exact path="/error" component={ErrorComponent}/>

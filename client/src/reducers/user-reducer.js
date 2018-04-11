@@ -11,6 +11,7 @@ export default function UserReducer(state = {loginState: 'logged out'}, action) 
         case LOGIN_SUCCESSFUL:
             return Object.assign({}, state, {
                 loginState: 'success',
+                userId: action.userId,
                 loginToken: action.token
             });
         case LOGIN:

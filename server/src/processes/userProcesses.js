@@ -86,8 +86,8 @@ class UserProcesses {
         let userData, socket = null;
         while (userData = Object.keys(this.users).find(
             token=>this.users[token].user.toObject()._id.toString() === user._id.toString())) {
-            if (this.users[token].socket) {
-                socket = this.users[token].socket;
+            if (this.users[userData].socket) {
+                socket = this.users[userData].socket;
             }
             delete this.users[userData];
         }
@@ -106,7 +106,10 @@ class UserProcesses {
             direction: null
         };
 
-        return token;
+        return {
+            token,
+            userId: user._id
+        };
     }
 
     getUserFromToken(token) {

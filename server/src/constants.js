@@ -75,6 +75,7 @@ export const actions = {
     DRAW_PILE: 'draw pile',
     UP7_DRAW: 'draw discard',
     JOIN_GAME: 'join game',
+    REJOIN_GAME: 'rejoin game',
     ADD_TO_BOARD: 'add to board',
     ADD_TO_MELD: 'add to meld',
     DISCARD: 'discard',

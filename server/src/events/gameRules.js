@@ -11,6 +11,18 @@ class GameRules {
                         validation: null,
                         execution: GameEvents.joinGame,
                         undo: undoOptions.NA
+                    },
+                    [actions.REJOIN_GAME]: {
+                        validation: null,
+                        execution: GameEvents.joinGame,
+                        undo: undoOptions.NA
+                    }
+                },
+                [playerStates.WAIT]: {
+                    [actions.REJOIN_GAME]: {
+                        validation: null,
+                        execution: GameEvents.joinGame,
+                        undo: undoOptions.NA
                     }
                 }
             },
@@ -76,6 +88,11 @@ class GameRules {
                     }
                 },
                 [playerStates.ANY]: {
+                    [actions.REJOIN_GAME]: {
+                        validation: null,
+                        execution: GameEvents.joinGame,
+                        undo: undoOptions.NA
+                    },
                     [actions.RESIGN_REQUEST]: {
                         validation: null,
                         execution: GameEvents.resignRequest,

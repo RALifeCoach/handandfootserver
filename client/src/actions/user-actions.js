@@ -12,10 +12,11 @@ export function login(userId, password) {
     }
 }
 
-export function loginSuccessful(token) {
+export function loginSuccessful(token, userId) {
     return {
         type: LOGIN_SUCCESSFUL,
-        token: token
+        token,
+        userId
     }
 }
 

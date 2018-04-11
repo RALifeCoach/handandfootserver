@@ -1,4 +1,5 @@
 export const JOIN_GAME = 'join game';
+export const REJOIN_GAME = 'rejoin game';
 export const REFRESH_LIST = 'refresh list';
 export const REQUEST_LIST = 'request list';
 export const ADD_GAME_CLICK = 'add game click';
@@ -8,6 +9,15 @@ export const ADD_GAME_REQUEST = 'add game request';
 export function joinGame(gameName, password, direction) {
     return {
         type: JOIN_GAME,
+        gameName,
+        password,
+        direction
+    }
+}
+
+export function rejoinGame(gameName, password, direction) {
+    return {
+        type: REJOIN_GAME,
         gameName,
         password,
         direction

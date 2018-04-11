@@ -48,7 +48,7 @@ export default class ConnectedSocket {
             return;
         }
 
-        if (message.type === 'join game') {
+        if (message.type === 'join game' || message.type === 'rejoin game') {
             message.updateData = {
                 user: this.userData.user
             };

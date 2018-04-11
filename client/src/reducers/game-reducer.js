@@ -25,6 +25,7 @@ export default function GameReducer(state = {gameState: 'not connected'}, action
             });
         case UPDATE_GAME:
             return Object.assign({}, state, {
+                currentPlayerIndex: action.game.currentPlayerIndex,
                 gameState: action.game.gameState,
                 teams: action.game.teams,
                 players: action.game.players,

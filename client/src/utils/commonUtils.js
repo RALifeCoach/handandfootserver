@@ -3,14 +3,11 @@ export default class CommonUtils {
         return games.map(game=>(
             {
                 name: game.name,
-                players: [{teamIndex: 0, playerIndex: 0, direction: 'North'},
-                    {teamIndex: 1, playerIndex: 0, direction: 'East'},
-                    {teamIndex: 0, playerIndex: 1, direction: 'South'},
-                    {teamIndex: 1, playerIndex: 1, direction: 'West'}]
-                    .map(playerData=>({
-                        name: game.players[playerData.playerIndex].user
-                            && game.players[playerData.playerIndex].user.name,
-                        direction: playerData.direction
+                players: ['North', 'East', 'South', 'West']
+                    .map((direction, playerIndex)=>({
+                        name: game.players[playerIndex].name,
+                        userId: game.players[playerIndex].userId,
+                        direction
                     }))
             }
         ))

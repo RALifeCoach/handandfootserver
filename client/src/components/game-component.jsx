@@ -6,15 +6,29 @@ import {
 } from "../actions/game-actions";
 
 const GameComponent = props => {
+    const namesStyle = {
+        width: '100%',
+        padding: '5px'
+    };
+
     return (
         <Grid>
             <Row className="show-grid">
-                <Col xs={12} md={8} className="border border-dark">
-                    {props.players && props.players.map((player, playerIndex)=>(
-                        <Col xs={3} md={2} key={playerIndex} className='border border-dark border-right'>
-                            <span>{player.name}</span>
-                        </Col>
-                    ))}
+                <Col xs={12} md={8}>
+                    {props.players && props.players.map((player, playerIndex)=>{
+                        const classes = playerIndex === props.currentPlayerIndex
+                            ? 'card bg-danger'
+                            : playerIndex === 0
+                                ? 'card bg-primary'
+                                : 'card bg-secondary';
+                        return (
+                            <Col xs={12 / props.players.length} key={playerIndex} className='border border-dark border-right'>
+                                <div xs={12} className={classes} style={namesStyle}>
+                                    <span>{player.name || 'Open'}</span>
+                                </div>
+                            </Col>
+                        )
+                    })}
                 </Col>
             </Row>
         </Grid>

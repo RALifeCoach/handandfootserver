@@ -6,7 +6,21 @@ import { directions } from '../constants';
 export default class GameController {
     static games(req, res){
         GameModel.find({}).populate('players.user').exec((err, games) => {
-            res.json({ success: true, games: games.map(game=>game.toObject()) });
+            res.json({
+                success: true,
+                games: games.map(gameModel=>{
+                    const game = gameModel.toObject();
+                    return {
+                        name: game.name,
+                        players: game.players.map(player=> (
+                            {
+                                name: player.user && player.user.name || null,
+                                userId: player.user && player.user._id || null
+                            }
+                        ))
+                    };
+                })
+            });
         });
     }
 

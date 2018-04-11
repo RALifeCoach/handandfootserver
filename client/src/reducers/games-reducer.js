@@ -1,6 +1,6 @@
 import {
     JOIN_GAME,
-    REQUEST_LIST,
+    REJOIN_GAME,
     REFRESH_LIST,
     ADD_GAME_CLICK,
     ADD_GAME_REQUEST,
@@ -15,7 +15,11 @@ export default function GamesReducer(state = {gamesState: 'login'}, action) {
                 gamesState: 'success',
                 games: action.games
             });
-        case REQUEST_LIST:
+        case JOIN_GAME:
+            return Object.assign({}, state, {
+                gamesState: 'waiting'
+            });
+        case REJOIN_GAME:
             return Object.assign({}, state, {
                 gamesState: 'waiting'
             });

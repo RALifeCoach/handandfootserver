@@ -23,6 +23,6 @@ export default class GameMiddleware {
     }
 
     static drawCardPile(state, pileIndex) {
-        Socket.getInstance().sendDrawCardPile(state.reducers.game.gameName, state.reducers.game.direction, pileIndex);
+        Socket.sendDrawCardPile(state.reducers.game.gameName, state.reducers.game.direction, pileIndex);
     }
 }

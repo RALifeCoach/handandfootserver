@@ -1,5 +1,6 @@
 import {
     JOIN_GAME,
+    REJOIN_GAME,
     REQUEST_LIST,
     ADD_GAME_REQUEST,
     refreshList
@@ -28,6 +29,11 @@ export default class GamesMiddleware {
                             action.password, action.direction);
                         dispatch(push('game'));
                         break;
+                    case REJOIN_GAME:
+                        GamesMiddleware.sendRejoinGame(getState, dispatch, action.gameName,
+                            action.password, action.direction);
+                        dispatch(push('game'));
+                        break;
                     default:
                         break;
                 }
@@ -41,12 +47,13 @@ export default class GamesMiddleware {
                 if (response.status !== 200) {
                     dispatch(ioError(response.statusText));
                 } else {
+                    console.log('---- request list: ' + JSON.stringify(response.data));
                     const data = response.data;
                     if (!data.success) {
                         dispatch(ioError(data.message));
                         return;
                     }
-                    dispatch(refreshList(CommonUtils.formatGames(response.data.games)));
+                    dispatch(refreshList(CommonUtils.formatGames(data.games)));
                 }
             });
     }
@@ -57,6 +64,7 @@ export default class GamesMiddleware {
                 if (response.status !== 200) {
                     dispatch(ioError(response.statusText));
                 } else {
+                    console.log('---- add game: ' + JSON.stringify(response.data));
                     const data = response.data;
                     if (!data.success) {
                         dispatch(ioError(data.message));
@@ -66,6 +74,10 @@ export default class GamesMiddleware {
     }
 
     static sendJoinGame(getState, dispatch, gameName, password, direction) {
-        Socket.getInstance().sendJoinGame(gameName, password, direction);
+        Socket.sendJoinGame(gameName, password, direction);
+    }
+
+    static sendRejoinGame(getState, dispatch, gameName, password, direction) {
+        Socket.sendRejoinGame(gameName, password, direction);
     }
 }

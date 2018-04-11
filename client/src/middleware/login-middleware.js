@@ -11,6 +11,7 @@ import { requestList } from '../actions/games-actions';
 import { push } from 'react-router-redux';
 import Socket from './../utils/socket';
 import RestCalls from './../utils/rest-calls';
+import cookie from 'react-cookies';
 
 export default class LoginMiddleware {
     static login({dispatch, getState}) {
@@ -21,11 +22,10 @@ export default class LoginMiddleware {
                         LoginMiddleware.sendLoginData(action, dispatch);
                         break;
                     case LOGIN_SUCCESSFUL:
-                        new Socket().sendToken(action.token);
-                        setTimeout(()=>{
+                        Socket.sendToken(action.token, () => {
                             dispatch(requestList());
                             dispatch(push('games'));
-                        }, 200);
+                        });
                         break;
                     default:
                         break;
@@ -41,10 +41,15 @@ export default class LoginMiddleware {
                     dispatch(ioError(response.statusText));
                 } else {
                     response.data.success
-                        ? dispatch(loginSuccessful(response.data.token))
+                        ? LoginMiddleware.loginSuccessful(dispatch, response.data)
                         : dispatch(loginFailed());
                 }
             });
+    }
+
+    static loginSuccessful(dispatch, data) {
+        cookie.save('login', {token: data.token, userId: data.userId}, {path: '/'});
+        dispatch(loginSuccessful(data.token, data.userId));
     }
 
     static ioError({dispatch, getState}) {
