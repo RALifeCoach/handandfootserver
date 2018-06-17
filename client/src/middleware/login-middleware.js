@@ -1,7 +1,7 @@
 import {
     LOGIN,
     LOGIN_SUCCESSFUL,
-    LOGOUT,
+    RECONNECT,
     ERROR,
     loginSuccessful,
     loginFailed,
@@ -20,6 +20,10 @@ export default class LoginMiddleware {
                 switch (action.type) {
                     case LOGIN:
                         LoginMiddleware.sendLoginData(action, dispatch);
+                        break;
+                    case RECONNECT:
+                        cookie.remove('login');
+                        dispatch(push('/'));
                         break;
                     case LOGIN_SUCCESSFUL:
                         Socket.sendToken(action.token, () => {

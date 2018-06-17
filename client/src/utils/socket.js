@@ -4,6 +4,9 @@ import {
     JOIN_GAME
 } from '../messages/games-messages';
 import {
+    RECONNECT
+} from '../messages/login-messages';
+import {
     UPDATE_GAME
 } from '../messages/game-messages';
 import {
@@ -13,7 +16,8 @@ import {
     updateGame
 } from '../actions/game-actions';
 import {
-    ioError
+    ioError,
+    reconnect
 } from '../actions/user-actions';
 import CommonUtils from './../utils/commonUtils';
 
@@ -38,8 +42,12 @@ class Socket {
     }
 
     handleMessage(message) {
-        console.log('socket message: ' + JSON.stringify(message));
-        if (message.success === false) {
+        console.log('^^^^^ socket message: ' + JSON.stringify(message));
+        if (!message.success) {
+            if (message.type === RECONNECT) {
+                this.store.dispatch(reconnect());
+                return;
+            }
             this.store.dispatch(ioError(message.message));
             return;
         }

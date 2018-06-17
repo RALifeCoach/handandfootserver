@@ -2,6 +2,7 @@ import {
     LOGIN_SUCCESSFUL,
     LOGIN_FAILED,
     LOGIN,
+    RECONNECT,
     ERROR
 } from '../actions/user-actions';
 
@@ -17,6 +18,10 @@ export default function UserReducer(state = {loginState: 'logged out'}, action) 
         case LOGIN:
             return Object.assign({}, state, {
                 loginState: 'waiting'
+            });
+        case RECONNECT:
+            return Object.assign({}, state, {
+                loginState: 'logged out'
             });
         case LOGIN_FAILED:
             return Object.assign({}, state, {

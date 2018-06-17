@@ -34,15 +34,14 @@ module.exports = {
                         }
                     }
                 ]
+            },
+            {
+                test: /\.(css)$/,
+                include: [/src/, /node_modules/],
+                use: [ 'style-loader', 'css-loader' ]
             }
         ]
     },
-    /*
-loaders: [
-            { test: /\.(html)$/,
-              loader: "file?name=[path][name].[ext]&context=./app/static"
-            }
-        ]     */
     resolve: {
         extensions: ['.js', '.jsx'],
     }

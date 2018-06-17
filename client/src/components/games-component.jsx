@@ -4,22 +4,39 @@ import AddGameComponent from './add-game-component';
 import { connect } from "react-redux";
 import {
     addGameClick,
+    requestList,
     rejoinGame,
     joinGame
 } from "../actions/games-actions";
+import {
+    logout
+} from "../actions/user-actions";
 
 const GamesComponent = props => {
+    const shiftButton = {
+        marginLeft: '25px'
+    };
     return (
         <Grid>
             <Row className="show-grid">
                 <Col xs={9} md={6}>
-                    Game List
+                    <h1>Games List</h1>
                 </Col>
                 {props.gamesState === 'success' &&
                     <Col xs={3} md={6}>
                         <Button bsStyle="primary"
                                 onClick={() => props.addGameClick()}>
                             Add Game
+                        </Button>
+                        <Button bsStyle="primary"
+                                style={shiftButton}
+                                onClick={() => props.requestList()}>
+                            Refresh List
+                        </Button>
+                        <Button bsStyle="primary"
+                                style={shiftButton}
+                                onClick={() => props.logout()}>
+                            Logout
                         </Button>
                     </Col>
                 }
@@ -79,6 +96,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
         addGameClick: () => dispatch(addGameClick()),
+        requestList: () => dispatch(requestList()),
+        logout: () => dispatch(logout()),
         joinGame: (gameName, password, direction) => dispatch(joinGame(gameName, password, direction)),
         rejoinGame: (gameName, password, direction) => dispatch(rejoinGame(gameName, password, direction))
     }

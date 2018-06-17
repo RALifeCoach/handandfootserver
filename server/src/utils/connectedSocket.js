@@ -38,7 +38,7 @@ export default class ConnectedSocket {
             }
             this.userData = UserProcesses.getUserFromToken(message.token);
             if (!this.userData) {
-                this.socket.send(JSON.stringify({type: 'error', message: 'error token not found'}));
+                this.socket.send(JSON.stringify({type: 'reconnect', message: 'error token not found'}));
                 return;
             }
             this.userData.socket = this.socket;

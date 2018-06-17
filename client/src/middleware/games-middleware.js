@@ -6,8 +6,12 @@ import {
     refreshList
 } from '../actions/games-actions';
 import {
+    reconnect,
     ioError
 } from '../actions/user-actions';
+import {
+    RECONNECT
+} from '../messages/login-messages';
 import { push } from 'react-router-redux';
 import RestCalls from './../utils/rest-calls';
 import Socket from './../utils/socket';
@@ -50,6 +54,10 @@ export default class GamesMiddleware {
                     console.log('---- request list: ' + JSON.stringify(response.data));
                     const data = response.data;
                     if (!data.success) {
+                        if (data.type === RECONNECT) {
+                            dispatch(reconnect());
+                            return;
+                        }
                         dispatch(ioError(data.message));
                         return;
                     }

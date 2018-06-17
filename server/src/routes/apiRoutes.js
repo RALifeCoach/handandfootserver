@@ -24,10 +24,12 @@ router.use((req, res, next) => {
 
     // decode token
     if (token) {
+        console.log('have token: ' + token);
         // verifies secret and checks exp
         jwt.verify(token, global.app.superSecret, (err, decoded) => {
             if (err) {
-                return res.json({ success: false, message: 'Failed to authenticate token.' });
+                console.log('&&&&&&&&&&&&&&&&&&&&: ' + err.message);
+                return res.json({ success: false, type: 'reconnect', message: 'Failed to authenticate token.' });
             } else {
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;

@@ -6,6 +6,9 @@ import {
     ADD_GAME_REQUEST,
     ADD_GAME_CANCEL,
 } from '../actions/games-actions';
+import {
+    RECONNECT
+} from '../actions/user-actions';
 
 export default function GamesReducer(state = {gamesState: 'login'}, action) {
     console.log('games reducer: ' + JSON.stringify(state));
@@ -22,6 +25,10 @@ export default function GamesReducer(state = {gamesState: 'login'}, action) {
         case REJOIN_GAME:
             return Object.assign({}, state, {
                 gamesState: 'waiting'
+            });
+        case RECONNECT:
+            return Object.assign({}, state, {
+                gamesState: 'login'
             });
         case ADD_GAME_CLICK:
             return Object.assign({}, state, {

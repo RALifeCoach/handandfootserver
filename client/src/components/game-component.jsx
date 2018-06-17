@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Row, Col, Button } from 'react-bootstrap';
+import PlayingCard from 'react-playing-card';
 import { connect } from "react-redux";
 import {
     drawCardPile
@@ -19,8 +20,8 @@ const GameComponent = props => {
                         const classes = playerIndex === props.currentPlayerIndex
                             ? 'card bg-danger'
                             : playerIndex === 0
-                                ? 'card bg-primary'
-                                : 'card bg-secondary';
+                                ? 'bg-primary'
+                                : 'bg-secondary';
                         return (
                             <Col xs={12 / props.players.length} key={playerIndex} className='border border-dark border-right'>
                                 <div xs={12} className={classes} style={namesStyle}>
@@ -29,6 +30,11 @@ const GameComponent = props => {
                             </Col>
                         )
                     })}
+                </Col>
+            </Row>
+            <Row className="show-grid">
+                <Col xs={12} md={8}>
+                    <PlayingCard suit='C' rank='5' width='25px' size={.5}/>
                 </Col>
             </Row>
         </Grid>
